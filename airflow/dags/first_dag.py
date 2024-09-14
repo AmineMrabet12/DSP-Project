@@ -18,7 +18,7 @@ GOOD_DATA_PATH = '/Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DS
 )
 
 def file_processing_dag():
-
+    
     @task
     def read_data():
         raw_files = os.listdir(RAW_DATA_PATH)
