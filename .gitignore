@@ -3,13 +3,18 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-<<<<<<< Updated upstream
-=======
+# data
+data/*.csv
+airflow/airflow.db
+
+# data
+data/*.csv
+airflow/airflow.db
+
 # data
 data/*/*.csv
 airflow/airflow.db
 
->>>>>>> Stashed changes
 # C extensions
 *.so
 
