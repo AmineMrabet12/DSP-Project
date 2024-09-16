@@ -8,8 +8,9 @@ data/*.csv
 airflow/airflow.db
 
 # data
-data/*.csv
+# data/*.csv
 airflow/airflow.db
+.idea/
 
 # data
 data/*/*.csv
