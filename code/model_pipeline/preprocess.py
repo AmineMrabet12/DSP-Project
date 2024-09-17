@@ -9,6 +9,7 @@ from typing import Tuple, Union
 MODEL_PATH = '../models/'
 ScalerType = Union[StandardScaler, MinMaxScaler]
 
+
 def read_prepare_df(PATH: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
     df = pd.read_csv(PATH)
@@ -26,8 +27,8 @@ def read_prepare_df(PATH: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
     return X_train, X_test, y_train, y_test
 
 
-def ordinal_encoding(X: pd.DataFrame, y: pd.Series) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+def ordinal_encoding(X_train: pd.DataFrame, X_test: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     ordinal = OrdinalEncoder()
     categorical_columns = X_train.select_dtypes(include=['object']).columns
 
@@ -36,9 +37,9 @@ def ordinal_encoding(X: pd.DataFrame, y: pd.Series) -> Tuple[pd.DataFrame, pd.Da
     X_test[categorical_columns] = ordinal.transform(X_test[categorical_columns])
 
     dump(ordinal, MODEL_PATH + 'Ordinal_Encoder.joblib')
-    dump(X.columns, MODEL_PATH + 'columns.joblib')
+    dump(X_train.columns, MODEL_PATH + 'columns.joblib')
 
-    return X_train, X_test, y_train, y_test
+    return X_train, X_test
 
 
 def standardizing(X_train: pd.DataFrame, X_test: pd.DataFrame, scaler: ScalerType) -> Tuple[np.ndarray, np.ndarray]:

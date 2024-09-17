@@ -15,7 +15,7 @@ def load_joblibs() -> Tuple[pd.Index, OrdinalEncoder, ScalerType, xgb.XGBRegress
     cols = load(MODEL_PATH + 'columns.joblib')
     ordinal = load(MODEL_PATH + 'Ordinal_Encoder.joblib')
     standard = load(MODEL_PATH + 'Standard_Scaler.joblib')
-    model = load(MODEL_PATH + 'modXGBoost_classifierel.joblib')
+    model = load(MODEL_PATH + 'XGBoost_classifier.joblib')
 
     return cols, ordinal, standard, model
 
@@ -26,7 +26,11 @@ def make_predictions(data: pd.DataFrame) -> pd.DataFrame:
 
     ids = data['customerID']
     df_test = data[cols]
-    ordinal = encode_and_update(df_test, MODEL_PATH + 'Ordinal_Encoder.joblib')
+    try:
+        ordinal = encode_and_update(df_test, MODEL_PATH + 'Ordinal_Encoder.joblib')
+    except:
+        ordinal = ordinal
+        
     df_test[df_test.select_dtypes(include=['object']).columns] = ordinal.transform(
         df_test.select_dtypes(include=['object']))
 
