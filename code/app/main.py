@@ -5,6 +5,8 @@ app = FastAPI()
 
 # model = joblib.load("ai_app/models/model.joblib")
 
+# model = joblib.load("ai_app/models/model.joblib")
+
 
 @app.post("/predict")
 def predict():
