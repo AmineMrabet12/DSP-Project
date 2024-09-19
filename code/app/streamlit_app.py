@@ -24,6 +24,10 @@ def generate_input_fields(df):
         elif col_type == 'object':
             if col == 'customerID':
                 input_data[col] = st.text_input(f"Enter value for {col}", placeholder='Id')
+
+            elif col == 'Churn':
+                pass 
+            
             else:
                 # Get unique values in the object column for dropdown options
                 unique_values = df[col].unique().tolist()
@@ -35,7 +39,7 @@ def generate_input_fields(df):
 if option == "Manual Input":
     st.header("Input Features Manually")
 
-    sample_df = pd.read_csv('../../data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+    sample_df = pd.read_csv('../../data/churn.csv')
     sample_df['TotalCharges'] = pd.to_numeric(sample_df['TotalCharges'], errors='coerce')
     # sample_df['Churn'] = sample_df['Churn'].replace({'Yes': 1, 'No': 0})
     sample_df = sample_df.dropna()

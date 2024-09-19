@@ -4,7 +4,7 @@ from sqlalchemy.types import Boolean, DateTime
 from sqlalchemy import create_engine
 
 # Load CSV and infer column data types
-csv_path = '../../data/WA_Fn-UseC_-Telco-Customer-Churn.csv'  # Replace with the path to your CSV file
+csv_path = '../../data/churn.csv'  # Replace with the path to your CSV file
 df = pd.read_csv(csv_path)
 
 # Convert columns with errors in numeric conversion to NaN
@@ -35,11 +35,21 @@ for col_name, col_type in df.dtypes.items():
 
     # Check if this is the column you want to set as primary key
     if col_name == 'customerID':  # Set your column name here
-        column = Column(col_name, sqlalchemy_type, primary_key=True)
+        column = Column(col_name, sqlalchemy_type, primary_key=True, nullable=True)
+
+    elif col_name == 'TotalCharges':
+        column = Column(col_name, Float, primary_key=True, nullable=True)
+
+    elif col_name == 'Churn':
+        pass
+
     else:
         column = Column(col_name, sqlalchemy_type)
     
     columns.append(column)
+
+prediction_column = Column('prediction', Float)
+columns.append(prediction_column)
 
 # Define the table dynamically using the existing primary key column
 predictions = Table(
