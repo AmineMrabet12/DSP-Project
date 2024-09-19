@@ -62,8 +62,21 @@ async def shutdown():
 @app.post("/predict")
 async def predict(input_data_: ModelInput):
 
-        input_data__dict = input_data_.dict()
-        input_df = pd.DataFrame([input_data__dict])
+        input_data_dict = input_data_.dict()
+
+        # def convert_value(value):
+        #     if isinstance(value, np.int64):
+        #         return int(value)
+        #     elif isinstance(value, np.float64):
+        #         return float(value)
+        #     elif isinstance(value, (np.ndarray, pd.Series)):
+        #         return value.tolist()  # If it's a numpy array or pandas series, convert to list
+        #     return value
+
+        # input_data_dict = {key: convert_value(value) for key, value in input_data_dict.items()}
+
+
+        input_df = pd.DataFrame([input_data_dict])
 
         ordinal = load('../../models/Ordinal_Encoder.joblib')
         scaler = load('../../models/Standard_Scaler.joblib')
@@ -78,20 +91,28 @@ async def predict(input_data_: ModelInput):
         input_df[categorical_columns] = ordinal.transform(input_df[categorical_columns])
         input_df = scaler.transform(input_df)
 
-        prediction_value = model.predict(input_df)[0]
+        prediction_value = model.predict(input_df)[0].item()
+        print(prediction_value)
 
-        combined_data = input_data_.dict()
+        # combined_data = input_data_.dict()
+        combined_data = input_data_dict
 
-        combined_data["prediction"] = prediction_value
+        combined_data["prediction"] = int(prediction_value)
 
         # print(pd.DataFrame([combined_data]).dtypes)
 
         # Convert the combined data to a JSON string
-        combined_data = {
-            key: (value.item() if isinstance(value, (np.integer, np.floating)) else value)
-            for key, value in combined_data.items()
-        }
+        # combined_data = {
+        #     key: (value.item() if isinstance(value, (str)) else value)
+        #     for key, value in combined_data.items()
+        # }
 
+        # combined_data = pd.DataFrame([combined_data])
+        # combined_data = pd.to_numeric(combined_data, errors='coerce')
+        # combined_json = {
+        #     key: (value.item() if isinstance(value, (int, float)) else value)
+        #     for key, value in combined_data.items()
+        # }
         # value_types = {key: type(value) for key, value in combined_data.items()}
 
         # print(value_types)
@@ -99,13 +120,14 @@ async def predict(input_data_: ModelInput):
 
         # Insert the combined data into the database
         query = predictions.insert().values(
-                json.dumps(combined_data)
+                # json.dumps(combined_json)
+                **combined_data
         )
 
-        print(json.dumps(combined_data))
+        # print(json.dumps(combined_data))
         await database.execute(query)
 
-        return {"input": input_data_.dict(), "prediction": prediction_value}
+        return {"input": input_data_dict, "prediction": prediction_value}
 
 # Endpoint 2: Get all saved predictions
 @app.get("/past_predictions/")
