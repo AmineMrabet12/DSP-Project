@@ -9,6 +9,9 @@ from models import predictions
 from joblib import load
 import json
 import numpy as np
+from typing import List
+import logging
+
 
 # Initialize FastAPI and bind the metadata to create tables if they don't exist
 app = FastAPI()
@@ -64,17 +67,6 @@ async def predict(input_data_: ModelInput):
 
         input_data_dict = input_data_.dict()
 
-        # def convert_value(value):
-        #     if isinstance(value, np.int64):
-        #         return int(value)
-        #     elif isinstance(value, np.float64):
-        #         return float(value)
-        #     elif isinstance(value, (np.ndarray, pd.Series)):
-        #         return value.tolist()  # If it's a numpy array or pandas series, convert to list
-        #     return value
-
-        # input_data_dict = {key: convert_value(value) for key, value in input_data_dict.items()}
-
 
         input_df = pd.DataFrame([input_data_dict])
 
@@ -82,9 +74,6 @@ async def predict(input_data_: ModelInput):
         scaler = load('../../models/Standard_Scaler.joblib')
         categorical_columns = load('../../models/categorical_columns.joblib')
         columns = load('../../models/columns.joblib')
-
-        # print("columns", columns)
-        # print("categorical_columns", categorical_columns)
 
         input_df = input_df[columns]
 
@@ -98,25 +87,6 @@ async def predict(input_data_: ModelInput):
         combined_data = input_data_dict
 
         combined_data["prediction"] = int(prediction_value)
-
-        # print(pd.DataFrame([combined_data]).dtypes)
-
-        # Convert the combined data to a JSON string
-        # combined_data = {
-        #     key: (value.item() if isinstance(value, (str)) else value)
-        #     for key, value in combined_data.items()
-        # }
-
-        # combined_data = pd.DataFrame([combined_data])
-        # combined_data = pd.to_numeric(combined_data, errors='coerce')
-        # combined_json = {
-        #     key: (value.item() if isinstance(value, (int, float)) else value)
-        #     for key, value in combined_data.items()
-        # }
-        # value_types = {key: type(value) for key, value in combined_data.items()}
-
-        # print(value_types)
-        # print(combined_data)
 
         # Insert the combined data into the database
         query = predictions.insert().values(

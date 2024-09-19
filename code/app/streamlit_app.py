@@ -72,7 +72,7 @@ elif option == "CSV File Upload":
         if st.button("Predict from CSV"):
             data = csv_data.to_dict(orient='records')
             predictions = []
-
+    
             for row in data:
                 response = requests.post(FASTAPI_PREDICT_URL, json=row)
                 if response.status_code == 200:
