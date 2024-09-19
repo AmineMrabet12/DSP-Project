@@ -9,7 +9,7 @@ from datetime import datetime
 
 
 def _read_data():
-    df = pd.read_csv('data/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+    df = pd.read_csv('../data/churn.csv')
 
 
     return df

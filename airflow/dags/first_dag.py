@@ -22,6 +22,8 @@ def file_processing_dag():
     @task
     def read_data():
         raw_files = os.listdir(RAW_DATA_PATH)
+        print(raw_files)
+        print(RAW_DATA_PATH)
         file_paths = [os.path.join(RAW_DATA_PATH, file) for file in raw_files if file.endswith('.csv')]
 
         return file_paths  
