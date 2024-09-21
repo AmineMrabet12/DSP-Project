@@ -1,4 +1,3 @@
-# main.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,12 +12,11 @@ from typing import List
 import logging
 
 
-# Initialize FastAPI and bind the metadata to create tables if they don't exist
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8501"],  # Update this to specific domains in production
+    allow_origins=["http://localhost:8501"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,7 +24,7 @@ app.add_middleware(
 
 metadata.create_all(engine)
 
-# Model input schema
+
 class ModelInput(BaseModel):
     customerID: str
     gender: str
@@ -49,10 +47,8 @@ class ModelInput(BaseModel):
     MonthlyCharges: float
     TotalCharges: float
 
-# Load your saved model
 model = load('../../models/XGBoost_classifier.joblib')
 
-# Connect to the database on startup and disconnect on shutdown
 @app.on_event("startup")
 async def startup():
     await database.connect()   
@@ -61,7 +57,7 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
-# Endpoint 1: Predict and save result in the database
+
 @app.post("/predict")
 async def predict(input_data_: ModelInput):
 
@@ -88,27 +84,23 @@ async def predict(input_data_: ModelInput):
 
         combined_data["prediction"] = int(prediction_value)
 
-        # Insert the combined data into the database
         query = predictions.insert().values(
                 # json.dumps(combined_json)
                 **combined_data
         )
 
-        # print(json.dumps(combined_data))
         await database.execute(query)
 
         return {"input": input_data_dict, "prediction": prediction_value}
 
-# Endpoint 2: Get all saved predictions
+
 @app.get("/past_predictions/")
 async def get_predictions():
-    # Select all rows from the predictions table
         query = predictions.select()
         results = await database.fetch_all(query)
 
-        # Convert results to a list of dictionaries, where each dictionary represents a row
         parsed_results = [
-                dict(result)  # Convert each row to a dictionary
+                dict(result)
                 for result in results
         ]
 

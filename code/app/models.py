@@ -3,19 +3,17 @@ from sqlalchemy import Table, Column, Integer, String, Float, MetaData
 from sqlalchemy.types import Boolean, DateTime
 from sqlalchemy import create_engine
 
-# Load CSV and infer column data types
-csv_path = '../../data/churn.csv'  # Replace with the path to your CSV file
+
+csv_path = '../../data/churn.csv'
 df = pd.read_csv(csv_path)
 
-# Convert columns with errors in numeric conversion to NaN
 df = df.apply(pd.to_numeric, errors='ignore')
 
 # Connect to your database
-DATABASE_URL = "postgresql://mohamedaminemrabet:amine@localhost:5432/epita"  # Update this
+DATABASE_URL = "postgresql://mohamedaminemrabet:amine@localhost:5432/epita"
 engine = create_engine(DATABASE_URL)
 metadata = MetaData()
 
-# Function to map pandas dtypes to SQLAlchemy types
 def map_dtype(dtype):
     if pd.api.types.is_integer_dtype(dtype):
         return Integer
@@ -26,15 +24,14 @@ def map_dtype(dtype):
     elif pd.api.types.is_datetime64_any_dtype(dtype):
         return DateTime
     else:
-        return String  # Fallback for object or string types
+        return String
 
-# Create columns dynamically based on the CSV structure
+
 columns = []
 for col_name, col_type in df.dtypes.items():
     sqlalchemy_type = map_dtype(col_type)
 
-    # Check if this is the column you want to set as primary key
-    if col_name == 'customerID':  # Set your column name here
+    if col_name == 'customerID':
         column = Column(col_name, sqlalchemy_type, primary_key=True, nullable=True)
 
     elif col_name == 'TotalCharges':
@@ -51,11 +48,11 @@ for col_name, col_type in df.dtypes.items():
 prediction_column = Column('prediction', Float)
 columns.append(prediction_column)
 
-# Define the table dynamically using the existing primary key column
+
 predictions = Table(
     "past_predictions",
     metadata,
-    *columns  # Unpacking the list of columns
+    *columns
 )
 
 # Create the table in the database
