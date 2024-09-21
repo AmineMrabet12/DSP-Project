@@ -1,10 +1,6 @@
 from airflow import DAG
-import psycopg2
-from airflow.operators.python import PythonOperator, BranchPythonOperator
-from airflow.operators.bash import BashOperator
-from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.operators.python import PythonOperator
 import pandas as pd
-from random import randint
 from datetime import datetime
 
 

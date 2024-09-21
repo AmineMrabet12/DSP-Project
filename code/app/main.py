@@ -1,15 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 from database import database, engine, metadata
-from sklearn.preprocessing import OrdinalEncoder, StandardScaler
 from models import predictions
 from joblib import load
-import json
-import numpy as np
-from typing import List
-import logging
 
 
 app = FastAPI()

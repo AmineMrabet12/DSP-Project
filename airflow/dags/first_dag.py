@@ -2,7 +2,6 @@ from airflow.decorators import dag, task
 from datetime import datetime
 import os
 import shutil
-import pandas as pd
 
 
 RAW_DATA_PATH = '/Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DSP/data/raw-data'
