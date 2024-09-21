@@ -148,7 +148,7 @@ Don't forget to always `export AIRFLOW_HOME=${PWD}/airflow`
 ## Collaborators
 <center>
 <a href="https://github.com/semmaa" target="_blank">
-<img src="https://avatars.githubusercontent.com/u/100610447?v=4" alt="Waseemah Edoo" style="width: 50px; height: 50px; border-radius: 50%;"> 
+<img src="https://avatars.githubusercontent.com/u/100610447?v=4" alt="Waseemah Edoo" style="width: 50px; height: 50px; border-radius: 50px;"> 
 </a>
 <a href="https://github.com/joekhater" target="_blank">
 <img src="https://avatars.githubusercontent.com/u/100941116?v=4" alt="Joe Khater" style="width: 50px; height: 50px; border-radius: 50%;"> 
