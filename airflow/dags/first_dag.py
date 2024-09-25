@@ -39,6 +39,7 @@ def file_processing_dag():
             shutil.move(file, GOOD_DATA_PATH)
             # except:
             #     pass
+            break
 
     file_paths = read_data()
     save_file(file_paths)

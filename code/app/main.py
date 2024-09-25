@@ -5,7 +5,7 @@ import pandas as pd
 from database import database, engine, metadata
 from models import predictions
 from joblib import load
-
+from typing import List, Union
 
 app = FastAPI()
 
@@ -54,39 +54,49 @@ async def shutdown():
 
 
 @app.post("/predict")
-async def predict(input_data_: ModelInput):
+async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Accept a list of input data
 
-        input_data_dict = input_data_.dict()
+    # print(input_data_list)
+    if isinstance(input_data_list, list):  
+        input_data_dicts = [item.dict() for item in input_data_list]
+    else:
+        input_data_dicts = [input_data_list.dict()]
 
+    # input_data_dicts = [input_data.json() for input_data in input_data_list]#[0]
+    # print(input_data_dicts)
+    # input_data_dicts = [input_data.dict() for input_data in input_data_list]
 
-        input_df = pd.DataFrame([input_data_dict])
+    # Convert input data to DataFrame
+    input_df = pd.DataFrame(input_data_dicts)
+    # print(input_df)
 
-        ordinal = load('../../models/Ordinal_Encoder.joblib')
-        scaler = load('../../models/Standard_Scaler.joblib')
-        categorical_columns = load('../../models/categorical_columns.joblib')
-        columns = load('../../models/columns.joblib')
+    # Load preprocessing tools and column configurations
+    ordinal = load('../../models/Ordinal_Encoder.joblib')
+    scaler = load('../../models/Standard_Scaler.joblib')
+    categorical_columns = load('../../models/categorical_columns.joblib')
+    columns = load('../../models/columns.joblib')
 
-        input_df = input_df[columns]
+    # Ensure the dataframe columns are in the correct order
+    input_df = input_df[columns]
 
-        input_df[categorical_columns] = ordinal.transform(input_df[categorical_columns])
-        input_df = scaler.transform(input_df)
+    # Apply transformations
+    input_df[categorical_columns] = ordinal.transform(input_df[categorical_columns])
+    input_df = scaler.transform(input_df)
 
-        prediction_value = model.predict(input_df)[0].item()
-        print(prediction_value)
+    # Make predictions for all rows at once
+    predictions_values = model.predict(input_df).tolist()
+    # print(predictions_values)
 
-        # combined_data = input_data_.dict()
-        combined_data = input_data_dict
-
-        combined_data["prediction"] = int(prediction_value)
-
+    # Prepare the results for database insertion and return
+    for idx, prediction_value in enumerate(predictions_values):
+        input_data_dicts[idx]["prediction"] = int(prediction_value)
+        
         query = predictions.insert().values(
-                # json.dumps(combined_json)
-                **combined_data
+            **input_data_dicts[idx]
         )
-
         await database.execute(query)
 
-        return {"input": input_data_dict, "prediction": prediction_value}
+    return {"predictions": predictions_values}
 
 
 @app.get("/past_predictions/")

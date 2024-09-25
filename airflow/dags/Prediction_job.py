@@ -76,7 +76,7 @@ def make_predictions(**kwargs):
             for row in data_json:
                 response = requests.post(MODEL_API_URL, json=row)
                 if response.status_code == 200:
-                    predictions.append(response.json()['prediction'])
+                    predictions.append(response.json()['predictions'][0])
                 else:
                     predictions.append("Error")
 

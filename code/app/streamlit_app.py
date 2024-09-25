@@ -47,7 +47,7 @@ if option == "Manual Input":
     if st.button("Predict"):
         response = requests.post(FASTAPI_PREDICT_URL, json=user_input)
         if response.status_code == 200:
-            st.success(f"Prediction: {response.json()['prediction']}")
+            st.success(f"Prediction: {response.json()['predictions'][0]}")
         else:
             st.error("Error: Unable to get prediction")
 
@@ -67,17 +67,21 @@ elif option == "CSV File Upload":
 
         if st.button("Predict from CSV"):
             data = csv_data.to_dict(orient='records')
-            predictions = []
+            # predictions = []
 
-            for row in data:
-                response = requests.post(FASTAPI_PREDICT_URL, json=row)
-                if response.status_code == 200:
-                    predictions.append(response.json()['prediction'])
-                else:
-                    predictions.append("Error")
+            response = requests.post(FASTAPI_PREDICT_URL, json=data)
 
-            csv_data['Prediction'] = predictions
-            st.write(csv_data)
+            # for row in data:
+                # response = requests.post(FASTAPI_PREDICT_URL, json=row)
+            if response.status_code == 200:
+                predictions = response.json().get('predictions', [])
+                csv_data['Prediction'] = predictions
+                st.write(csv_data)
+            else:
+                st.error("Error: Unable to get predictions")
+
+            # csv_data['Prediction'] = predictions
+            # st.write(csv_data)
 
 
 elif option == "View Past Predictions":
