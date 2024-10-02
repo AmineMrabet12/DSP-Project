@@ -11,7 +11,7 @@ airflow/airflow.db
 # data/*.csv
 airflow/airflow.db
 .idea/
-
+.env
 # data
 data/*/*.csv
 airflow/airflow.db
