@@ -2,7 +2,12 @@ import pandas as pd
 from sqlalchemy import Table, Column, Integer, String, Float, MetaData
 from sqlalchemy.types import Boolean, DateTime
 from sqlalchemy import create_engine
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 csv_path = '../../data/churn.csv'
 df = pd.read_csv(csv_path)
@@ -10,7 +15,7 @@ df = pd.read_csv(csv_path)
 df = df.apply(pd.to_numeric, errors='ignore')
 
 # Connect to your database
-DATABASE_URL = "postgresql://mohamedaminemrabet:amine@localhost:5432/epita"
+# DATABASE_URL = "postgresql://mohamedaminemrabet:amine@localhost:5432/epita"
 # DATABASE_URL = "postgresql://wasedoo:postgres@localhost:5432/epita"
 engine = create_engine(DATABASE_URL)
 metadata = MetaData()
