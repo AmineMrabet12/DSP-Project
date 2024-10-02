@@ -56,7 +56,7 @@ for col_name, col_type in df.dtypes.items():
 prediction_column = Column('prediction', Float)
 columns.append(prediction_column)
 
-date_column = Column('date', DateTime, default=datetime.datetime.utcnow)
+date_column = Column('date', DateTime, default=datetime.datetime.utcnow().date)
 columns.append(date_column) 
 
 
