@@ -9,7 +9,7 @@ from typing import List, Union
 from fastapi import Query
 from sqlalchemy import select
 from sqlalchemy.sql import and_
-from datetime import datetime
+from datetime import date, datetime
 
 app = FastAPI()
 
@@ -91,7 +91,7 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Acce
     predictions_values = model.predict(input_df).tolist()
     # print(predictions_values)
 
-    current_time = datetime.now()
+    current_time = date.today()
 
     # Prepare the results for database insertion and return
     for idx, prediction_value in enumerate(predictions_values):
@@ -121,13 +121,13 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Acce
 
 @app.get("/past_predictions/")
 async def get_predictions(start_date: str = Query(None), end_date: str = Query(None)):
-    # Convert string dates to datetime.date objects
+    # Convert string dates to datetime objects
     if start_date:
         start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
     if end_date:
         end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
 
-    # Assuming your table has a 'date' column for when the prediction was made
+    # Assuming your table has a 'date' column as a datetime field
     query = predictions.select()
 
     if start_date and end_date:
