@@ -40,7 +40,7 @@ for col_name, col_type in df.dtypes.items():
     sqlalchemy_type = map_dtype(col_type)
 
     if col_name == 'customerID':
-        column = Column(col_name, sqlalchemy_type, primary_key=True, nullable=True)
+        column = Column(col_name, sqlalchemy_type, primary_key=True, nullable=False)
 
     elif col_name == 'TotalCharges':
         column = Column(col_name, Float, primary_key=True, nullable=True)
