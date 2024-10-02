@@ -91,20 +91,21 @@ elif option == "View Past Predictions":
     start_date = st.date_input("Start Date")
     end_date = st.date_input("End Date")
 
-    # Send a request to FastAPI with date filters as query parameters
-    params = {
-        "start_date": start_date.isoformat(),
-        "end_date": end_date.isoformat()
-    }
+    if start_date and end_date:
+        # Send a request to FastAPI with date filters as query parameters
+        params = {
+            "start_date": start_date.isoformat(),
+            "end_date": end_date.isoformat()
+        }
 
-    response = requests.get(FASTAPI_PAST_PREDICTIONS_URL, params=params)
+        response = requests.get(FASTAPI_PAST_PREDICTIONS_URL, params=params)
 
-    if response.status_code == 200:
-        past_predictions = response.json()
-        if len(past_predictions) > 0:
-            past_predictions_df = pd.DataFrame(past_predictions)
-            st.write(past_predictions_df)
+        if response.status_code == 200:
+            past_predictions = response.json()
+            if len(past_predictions) > 0:
+                past_predictions_df = pd.DataFrame(past_predictions)
+                st.write(past_predictions_df.drop(columns=['date']))
+            else:
+                st.write("No past predictions found for the selected date range.")
         else:
-            st.write("No past predictions found for the selected date range.")
-    else:
-        st.error("Failed to fetch past predictions.")
+            st.error("Failed to fetch past predictions.")
