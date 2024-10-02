@@ -6,6 +6,10 @@ from database import database, engine, metadata
 from models import predictions
 from joblib import load
 from typing import List, Union
+from fastapi import Query
+from sqlalchemy import select
+from sqlalchemy.sql import and_
+from datetime import datetime
 
 app = FastAPI()
 
@@ -87,9 +91,12 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Acce
     predictions_values = model.predict(input_df).tolist()
     # print(predictions_values)
 
+    current_time = datetime.now()
+
     # Prepare the results for database insertion and return
     for idx, prediction_value in enumerate(predictions_values):
         input_data_dicts[idx]["prediction"] = int(prediction_value)
+        input_data_dicts[idx]["date"] = current_time
         
         query = predictions.insert().values(
             **input_data_dicts[idx]
@@ -99,14 +106,40 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Acce
     return {"predictions": predictions_values}
 
 
+# @app.get("/past_predictions/")
+# async def get_predictions():
+#         query = predictions.select()
+#         results = await database.fetch_all(query)
+
+#         parsed_results = [
+#                 dict(result)
+#                 for result in results
+#         ]
+
+#         return parsed_results
+
+
 @app.get("/past_predictions/")
-async def get_predictions():
-        query = predictions.select()
-        results = await database.fetch_all(query)
+async def get_predictions(start_date: str = Query(None), end_date: str = Query(None)):
+    # Convert string dates to datetime.date objects
+    if start_date:
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+    if end_date:
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
 
-        parsed_results = [
-                dict(result)
-                for result in results
-        ]
+    # Assuming your table has a 'date' column for when the prediction was made
+    query = predictions.select()
 
-        return parsed_results
+    if start_date and end_date:
+        query = query.where(
+            and_(
+                predictions.c.date >= start_date,
+                predictions.c.date <= end_date
+            )
+        )
+
+    results = await database.fetch_all(query)
+
+    parsed_results = [dict(result) for result in results]
+
+    return parsed_results

@@ -87,7 +87,17 @@ elif option == "CSV File Upload":
 elif option == "View Past Predictions":
     st.header("Past Predictions")
 
-    response = requests.get(FASTAPI_PAST_PREDICTIONS_URL)
+    # Date filter inputs
+    start_date = st.date_input("Start Date")
+    end_date = st.date_input("End Date")
+
+    # Send a request to FastAPI with date filters as query parameters
+    params = {
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat()
+    }
+
+    response = requests.get(FASTAPI_PAST_PREDICTIONS_URL, params=params)
 
     if response.status_code == 200:
         past_predictions = response.json()
@@ -95,6 +105,6 @@ elif option == "View Past Predictions":
             past_predictions_df = pd.DataFrame(past_predictions)
             st.write(past_predictions_df)
         else:
-            st.write("No past predictions found.")
+            st.write("No past predictions found for the selected date range.")
     else:
         st.error("Failed to fetch past predictions.")

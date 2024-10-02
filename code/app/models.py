@@ -2,6 +2,8 @@ import pandas as pd
 from sqlalchemy import Table, Column, Integer, String, Float, MetaData
 from sqlalchemy.types import Boolean, DateTime
 from sqlalchemy import create_engine
+from sqlalchemy import DateTime
+import datetime
 
 
 csv_path = '../../data/churn.csv'
@@ -48,6 +50,9 @@ for col_name, col_type in df.dtypes.items():
 
 prediction_column = Column('prediction', Float)
 columns.append(prediction_column)
+
+date_column = Column('date', DateTime, default=datetime.datetime.utcnow)
+columns.append(date_column) 
 
 
 predictions = Table(
