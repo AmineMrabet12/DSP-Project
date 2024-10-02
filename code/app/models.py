@@ -10,7 +10,8 @@ df = pd.read_csv(csv_path)
 df = df.apply(pd.to_numeric, errors='ignore')
 
 # Connect to your database
-DATABASE_URL = "postgresql://mohamedaminemrabet:amine@localhost:5432/epita"
+# DATABASE_URL = "postgresql://mohamedaminemrabet:amine@localhost:5432/epita"
+DATABASE_URL = "postgresql://wasedoo:postgres@localhost:5432/epita"
 engine = create_engine(DATABASE_URL)
 metadata = MetaData()
 
