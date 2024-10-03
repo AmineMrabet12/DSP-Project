@@ -3,7 +3,6 @@ from datetime import datetime
 import os
 import shutil
 from airflow.exceptions import AirflowSkipException
-import toml
 
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/")
 RAW_DATA_PATH = os.path.join(data_path, "raw-data")
