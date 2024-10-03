@@ -97,7 +97,7 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Acce
     for idx, prediction_value in enumerate(predictions_values):
         input_data_dicts[idx]["prediction"] = int(prediction_value)
         input_data_dicts[idx]["date"] = current_time
-        input_data_dicts[idx]["SourcePrediction"] = 'web'
+        input_data_dicts[idx]["SourcePrediction"] = 'Web Application'
 
         
         query = predictions.insert().values(
@@ -122,7 +122,7 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Acce
 
 
 @app.get("/past_predictions/")
-async def get_predictions(start_date: str = Query(None), end_date: str = Query(None)):
+async def get_predictions(start_date: str = Query(None), end_date: str = Query(None), source: str = Query(None)):
     # Convert string dates to datetime objects
     if start_date:
         start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
@@ -139,6 +139,8 @@ async def get_predictions(start_date: str = Query(None), end_date: str = Query(N
                 predictions.c.date <= end_date
             )
         )
+    if source and source != "All":
+        query = query.where(predictions.c.SourcePrediction == source)
 
     results = await database.fetch_all(query)
 

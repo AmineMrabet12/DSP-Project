@@ -94,12 +94,12 @@ elif option == "View Past Predictions":
     source = st.selectbox("Select prediction source:", (
     "Web Application", "Scheduled Predictions", "All"))
 
-
     if start_date and end_date:
         # Send a request to FastAPI with date filters as query parameters
         params = {
             "start_date": start_date.isoformat(),
-            "end_date": end_date.isoformat()
+            "end_date": end_date.isoformat(),
+            "source" : source
         }
 
         response = requests.get(FASTAPI_PAST_PREDICTIONS_URL, params=params)
