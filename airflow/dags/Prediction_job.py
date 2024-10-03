@@ -73,12 +73,18 @@ def make_predictions(**kwargs):
 
             data_json = df.to_dict(orient='records')
 
-            for row in data_json:
-                response = requests.post(MODEL_API_URL, json=row)
-                if response.status_code == 200:
-                    predictions.append(response.json()['predictions'][0])
-                else:
-                    predictions.append("Error")
+            # for row in data_json:
+            # data_json["SourcePrediction"] = "Scheduled Predictions"
+
+            response = requests.post(MODEL_API_URL, json=data_json, headers={"X-Source": "airflow"})
+
+
+            # for row in data_json:
+                # response = requests.post(MODEL_API_URL, json=row)
+            if response.status_code == 200:
+                predictions.append(response.json()['predictions'])
+            else:
+                predictions.append("Error")
 
     return predictions
 
