@@ -3,11 +3,11 @@ from datetime import datetime
 import os
 import shutil
 from airflow.exceptions import AirflowSkipException
+import toml
 
-
-RAW_DATA_PATH = '/Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DSP/data/raw-data'
-GOOD_DATA_PATH = '/Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DSP/data/good-data'
-
+data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/")
+RAW_DATA_PATH = os.path.join(data_path, "raw-data")
+GOOD_DATA_PATH = os.path.join(data_path, "good-data")
 
 @dag(
     dag_id='dsp_data_processing',

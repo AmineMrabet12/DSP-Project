@@ -7,3 +7,4 @@ fastapi==0.114.2
 flake8==7.1.0
 streamlit==1.38.0
 sqlalchemy<2.0
+toml
