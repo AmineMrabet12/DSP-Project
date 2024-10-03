@@ -97,6 +97,8 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Acce
     for idx, prediction_value in enumerate(predictions_values):
         input_data_dicts[idx]["prediction"] = int(prediction_value)
         input_data_dicts[idx]["date"] = current_time
+        input_data_dicts[idx]["SourcePrediction"] = 'web'
+
         
         query = predictions.insert().values(
             **input_data_dicts[idx]

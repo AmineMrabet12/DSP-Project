@@ -57,6 +57,8 @@ columns.append(prediction_column)
 date_column = Column('date', DateTime, default=datetime.datetime.utcnow().date)
 columns.append(date_column) 
 
+source_prediction = Column('SourcePrediction', String)
+columns.append(source_prediction)
 
 predictions = Table(
     "past_predictions",
