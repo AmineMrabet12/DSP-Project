@@ -9,3 +9,4 @@ streamlit==1.38.0
 sqlalchemy<2.0
 pydantic==2.9.2
 toml==0.10.2
+great-expectations==0.15.10
