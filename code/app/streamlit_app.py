@@ -45,7 +45,7 @@ if option == "Manual Input":
     user_input = generate_input_fields(sample_df)
 
     if st.button("Predict"):
-        response = requests.post(FASTAPI_PREDICT_URL, json=user_input)
+        response = requests.post(FASTAPI_PREDICT_URL, json=user_input, headers={"X-Source": "streamlit"})
         if response.status_code == 200:
             st.success(f"Prediction: {response.json()['predictions'][0]}")
         else:
@@ -69,14 +69,17 @@ elif option == "CSV File Upload":
             data = csv_data.to_dict(orient='records')
             # predictions = []
 
-            response = requests.post(FASTAPI_PREDICT_URL, json=data)
+            response = requests.post(FASTAPI_PREDICT_URL, json=data, headers={"X-Source": "streamlit"})
 
             # for row in data:
                 # response = requests.post(FASTAPI_PREDICT_URL, json=row)
             if response.status_code == 200:
                 predictions = response.json().get('predictions', [])
                 csv_data['Prediction'] = predictions
-                st.write(csv_data)
+                try:
+                    st.write(csv_data.drop(columns=['Churn']))
+                except:
+                    st.write(csv_data)
             else:
                 st.error("Error: Unable to get predictions")
 
@@ -88,14 +91,28 @@ elif option == "View Past Predictions":
     st.header("Past Predictions")
 
     # Date filter inputs
-    start_date = st.date_input("Start Date")
-    end_date = st.date_input("End Date")
+    col1, col2, col3 = st.columns(3)
+
+    # Display start date in the first column
+    with col1:
+        start_date = st.date_input("Start Date")
+
+    # Display end date in the second column
+    with col2:
+        end_date = st.date_input("End Date")
+
+    with col3:
+        source = st.selectbox("Select prediction source:", (
+        "Web Application", "Scheduled Predictions", "All"))
+
+    
 
     if start_date and end_date:
         # Send a request to FastAPI with date filters as query parameters
         params = {
             "start_date": start_date.isoformat(),
-            "end_date": end_date.isoformat()
+            "end_date": end_date.isoformat(),
+            "source" : source
         }
 
         response = requests.get(FASTAPI_PAST_PREDICTIONS_URL, params=params)
@@ -104,7 +121,7 @@ elif option == "View Past Predictions":
             past_predictions = response.json()
             if len(past_predictions) > 0:
                 past_predictions_df = pd.DataFrame(past_predictions)
-                st.write(past_predictions_df.drop(columns=['date']))
+                st.write(past_predictions_df.drop(columns=['date', 'SourcePrediction']))
             else:
                 st.write("No past predictions found for the selected date range.")
         else:

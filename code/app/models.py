@@ -16,9 +16,7 @@ df = pd.read_csv(csv_path)
 
 df = df.apply(pd.to_numeric, errors='ignore')
 
-# Connect to your database
-# DATABASE_URL = "postgresql://mohamedaminemrabet:amine@localhost:5432/epita"
-# DATABASE_URL = "postgresql://wasedoo:postgres@localhost:5432/epita"
+
 engine = create_engine(DATABASE_URL)
 metadata = MetaData()
 
@@ -59,6 +57,8 @@ columns.append(prediction_column)
 date_column = Column('date', DateTime, default=datetime.datetime.utcnow().date)
 columns.append(date_column) 
 
+source_prediction = Column('SourcePrediction', String)
+columns.append(source_prediction)
 
 predictions = Table(
     "past_predictions",

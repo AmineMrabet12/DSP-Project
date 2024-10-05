@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
@@ -58,7 +58,11 @@ async def shutdown():
 
 
 @app.post("/predict")
-async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Accept a list of input data
+async def predict(input_data_list: Union[ModelInput, List[ModelInput]], request: Request):  # Accept a list of input data
+
+    source_prediction = "Scheduled Predictions"  # Default for Airflow
+    if request.headers.get("X-Source") == "streamlit":
+        source_prediction = "Web Application"
 
     # print(input_data_list)
     if isinstance(input_data_list, list):  
@@ -97,6 +101,8 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Acce
     for idx, prediction_value in enumerate(predictions_values):
         input_data_dicts[idx]["prediction"] = int(prediction_value)
         input_data_dicts[idx]["date"] = current_time
+        input_data_dicts[idx]["SourcePrediction"] = source_prediction
+
         
         query = predictions.insert().values(
             **input_data_dicts[idx]
@@ -120,7 +126,7 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]]):  # Acce
 
 
 @app.get("/past_predictions/")
-async def get_predictions(start_date: str = Query(None), end_date: str = Query(None)):
+async def get_predictions(start_date: str = Query(None), end_date: str = Query(None), source: str = Query(None)):
     # Convert string dates to datetime objects
     if start_date:
         start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
@@ -137,6 +143,8 @@ async def get_predictions(start_date: str = Query(None), end_date: str = Query(N
                 predictions.c.date <= end_date
             )
         )
+    if source and source != "All":
+        query = query.where(predictions.c.SourcePrediction == source)
 
     results = await database.fetch_all(query)
 

@@ -2,16 +2,16 @@ from airflow.decorators import dag, task
 from datetime import datetime
 import os
 import shutil
+from airflow.exceptions import AirflowSkipException
 
-
-RAW_DATA_PATH = '/Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DSP/data/raw-data'
-GOOD_DATA_PATH = '/Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DSP/data/good-data'
-
+data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/")
+RAW_DATA_PATH = os.path.join(data_path, "raw-data")
+GOOD_DATA_PATH = os.path.join(data_path, "good-data")
 
 @dag(
     dag_id='dsp_data_processing',
     start_date=datetime(2024, 1, 1),
-    schedule_interval='*/5 * * * *',
+    schedule_interval='*/1 * * * *',
     tags=['DSP'],
     catchup=False
 )
@@ -21,11 +21,17 @@ def file_processing_dag():
     @task
     def read_data():
         raw_files = os.listdir(RAW_DATA_PATH)
-        print(raw_files)
-        print(RAW_DATA_PATH)
+        print(f"Files in {RAW_DATA_PATH}: {raw_files}")
+        
+        # Get CSV file paths from the raw folder
         file_paths = [os.path.join(RAW_DATA_PATH, file) for file in raw_files if file.endswith('.csv')]
 
+        # If no new files, raise AirflowSkipException to mark the task as skipped
+        if not file_paths:
+            raise AirflowSkipException("No new data found to process.")
+        
         return file_paths  
+ 
 
     @task
     def save_file(file_paths):

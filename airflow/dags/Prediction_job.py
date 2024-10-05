@@ -7,12 +7,11 @@ import requests
 import pandas as pd
 import json
 
-
-GOOD_DATA_FOLDER = "../data/good-data"
+data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/")
+GOOD_DATA_FOLDER = os.path.join(data_path, "good-data")
+PROCESSED_FILES_PATH = os.path.join(data_path, "processed_files.json")
 
 MODEL_API_URL = "http://localhost:8000/predict"
-
-PROCESSED_FILES_PATH = "../data/processed_files.json"
 
 def load_processed_files():
     if os.path.exists(PROCESSED_FILES_PATH):
@@ -73,12 +72,18 @@ def make_predictions(**kwargs):
 
             data_json = df.to_dict(orient='records')
 
-            for row in data_json:
-                response = requests.post(MODEL_API_URL, json=row)
-                if response.status_code == 200:
-                    predictions.append(response.json()['predictions'][0])
-                else:
-                    predictions.append("Error")
+            # for row in data_json:
+            # data_json["SourcePrediction"] = "Scheduled Predictions"
+
+            response = requests.post(MODEL_API_URL, json=data_json, headers={"X-Source": "airflow"})
+
+
+            # for row in data_json:
+                # response = requests.post(MODEL_API_URL, json=row)
+            if response.status_code == 200:
+                predictions.append(response.json()['predictions'])
+            else:
+                predictions.append("Error")
 
     return predictions
 
