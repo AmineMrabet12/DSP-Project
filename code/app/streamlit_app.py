@@ -18,7 +18,11 @@ def generate_input_fields(df):
         col_type = df[col].dtype
 
         if col_type == 'float64' or col_type == 'int64':
-            input_data[col] = st.number_input(f"Enter value for {col}", value=0.0)
+            if col == 'SeniorCitizen':
+                values = [0, 1]
+                input_data[col] = st.selectbox(f"Select value for {col}", values)
+            else:
+                input_data[col] = st.number_input(f"Enter value for {col}", value=0.0)
 
         elif col_type == 'object':
             if col == 'customerID':
