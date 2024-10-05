@@ -15,8 +15,8 @@ option = st.selectbox("Select option:", ("Manual Input", "CSV File Upload", "Vie
 
 def generate_unique_id():
     letters = ''.join(random.choice(string.ascii_uppercase) for _ in range(4))
-    numbers = str(random.randint(100, 999))
-    unique_id = f"{letters}-{numbers}"
+    numbers = str(random.randint(1000, 9999))
+    unique_id = f"{numbers}-{letters}"
     return unique_id
 
 def generate_input_fields(df):
