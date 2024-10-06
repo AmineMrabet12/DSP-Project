@@ -46,7 +46,7 @@ class ModelInput(BaseModel):
     MonthlyCharges: float
     TotalCharges: float
 
-model = load('../../models/XGBoost_classifier.joblib')
+model = load('../../models/grid_search.joblib')
 
 @app.on_event("startup")
 async def startup():
