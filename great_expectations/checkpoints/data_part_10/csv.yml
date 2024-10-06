@@ -1,10 +1,10 @@
-name: test_validation
+name: data_part_10.csv
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
 class_name: Checkpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
-expectation_suite_name:
+expectation_suite_name: validation_test
 batch_request: {}
 action_list:
   - name: store_validation_result
@@ -16,17 +16,14 @@ action_list:
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-      site_names: []
 evaluation_parameters: {}
 runtime_configuration: {}
 validations:
   - batch_request:
-      datasource_name: infected_churn
+      datasource_name: infected_second_test
       data_connector_name: default_inferred_data_connector_name
-      data_asset_name: .*
-      data_connector_query:
-        index: -1
-    expectation_suite_name: validation_test
+      data_asset_name: data_part_10.csv
+      expectation_suite_name: validation_test
 profilers: []
 ge_cloud_id:
 expectation_suite_ge_cloud_id:
