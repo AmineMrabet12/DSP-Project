@@ -1,7 +1,9 @@
 import streamlit as st
 import pandas as pd
 import requests
-
+import uuid
+import random
+import string
 
 FASTAPI_PREDICT_URL = "http://localhost:8000/predict/"
 FASTAPI_PAST_PREDICTIONS_URL = "http://localhost:8000/past_predictions/"
@@ -11,6 +13,11 @@ st.title("Prediction Web App")
 
 option = st.selectbox("Select option:", ("Manual Input", "CSV File Upload", "View Past Predictions"))
 
+def generate_unique_id():
+    letters = ''.join(random.choice(string.ascii_uppercase) for _ in range(4))
+    numbers = str(random.randint(1000, 9999))
+    unique_id = f"{numbers}-{letters}"
+    return unique_id
 
 def generate_input_fields(df):
     input_data = {}
@@ -18,11 +25,17 @@ def generate_input_fields(df):
         col_type = df[col].dtype
 
         if col_type == 'float64' or col_type == 'int64':
-            input_data[col] = st.number_input(f"Enter value for {col}", value=0.0)
+            if col == 'SeniorCitizen':
+                values = [0, 1]
+                input_data[col] = st.selectbox(f"Select value for {col}", values)
+            else:
+                input_data[col] = st.number_input(f"Enter value for {col}", value=0.0)
 
         elif col_type == 'object':
             if col == 'customerID':
-                input_data[col] = st.text_input(f"Enter value for {col}", placeholder='Id')
+                input_data[col] = generate_unique_id()
+
+                # input_data[col] = st.text_input(f"Enter value for {col}", placeholder='Id')
 
             elif col == 'Churn':
                 pass 
@@ -30,6 +43,7 @@ def generate_input_fields(df):
             else:
                 unique_values = df[col].unique().tolist()
                 input_data[col] = st.selectbox(f"Select value for {col}", unique_values)
+
 
     return input_data
 
