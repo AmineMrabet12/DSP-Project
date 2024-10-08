@@ -5,6 +5,7 @@ import shutil
 import pandas as pd
 from airflow.exceptions import AirflowSkipException
 import great_expectations as ge
+# from ruamel.yaml import YAML
 
 # Define paths
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/")
@@ -51,30 +52,76 @@ def file_processing_dag():
         for file_path in file_paths:
             data_asset_name = os.path.basename(file_path)
 
-            # Load the file as a DataFrame
-            df = pd.read_csv(file_path)
-            batch = ge.dataset.PandasDataset(df)
+            # Create a batch request for the file
+            # batch_request = {
+            #     # 'datasource_name': 'infected_second_test',  # Update these with your Great Expectations setup
+            #     # 'data_connector_name': 'default_inferred_data_connector_name',
+            #     # 'data_asset_name': data_asset_name,  # Use the filename as the data asset name
+            #     # 'runtime_parameters': {'batch_data': file_path},  # Pass the file path dynamically
+            #     # 'batch_spec_passthrough': {'reader_options': {'header': True}},
+            #     # 'batch_identifiers': {'default_identifier': 'default'}  # Adding batch_identifiers
+            # }
+            
+            # Run the validation
+            checkpoint_name = 'test_validation_2'  # Update this to your actual checkpoint name
+            yaml_config = f"""
+name: {checkpoint_name}
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
+class_name: Checkpoint
+run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
+expectation_suite_name: validation_test
+batch_request: {{}}
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names: []
+evaluation_parameters: {{}}
+runtime_configuration: {{}}
+validations:
+  - batch_request:
+      datasource_name: infected_second_test
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: {data_asset_name}
+    expectation_suite_name: validation_test
+profilers: []
+ge_cloud_id:
+expectation_suite_ge_cloud_id:
+"""
 
-            # Validate the DataFrame against the loaded Expectation Suite
-            result = batch.validate(expectation_suite=expectation_suite)
+            with open('/Users/wasedoo/Documents/EPITA/M2/DSP/DSP-Project/great_expectations/checkpoints/test_validation_2.yml', 'w') as yaml_file:
+                yaml_file.write(yaml_config)
+                # print(f"Saved YAML configuration to {yaml_file_path}")
+            
+            # yaml = YAML()
+            # context.add_checkpoint(**yaml.load(yaml_config))
 
-            invalid_indices = set()
+            result = context.run_checkpoint(
+                checkpoint_name=checkpoint_name
+                # batch_request=batch_request
+                # expectation_suite_name="validation_test",
+                # validations=[
+                #     {
+                #         "batch_request": batch_request
+                #     }
+                # ]
+            )
 
-            # Loop through validation results to collect invalid row indices
-            for validation in result['results']:
-                if not validation['success']:
-                    # Collect the list of invalid row indices for the failed expectations
-                    unexpected_indices = validation['result'].get('unexpected_index_list', [])
-                    invalid_indices.update(unexpected_indices)
-
-            # Separate valid and invalid rows
-            valid_rows_df = df.drop(list(invalid_indices))
-            invalid_rows_df = df.iloc[list(invalid_indices)]
-
-            if not valid_rows_df.empty:
-                valid_files.append((valid_rows_df, file_path))
-            if not invalid_rows_df.empty:
-                invalid_files.append((invalid_rows_df, file_path))
+            # Check if the validation passed
+            if result.success:
+                print(f"{file_path} passed validation.")
+                valid_files.append(file_path)
+            else:
+                print(f"{file_path} failed validation.")
+                invalid_files.append(file_path)
 
             break
 
