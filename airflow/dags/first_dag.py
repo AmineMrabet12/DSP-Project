@@ -2,9 +2,9 @@ from airflow.decorators import dag, task
 from datetime import datetime
 import os
 import shutil
+import pandas as pd
 from airflow.exceptions import AirflowSkipException
 import great_expectations as ge
-from ruamel.yaml import YAML
 
 # Define paths
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/")
@@ -18,7 +18,7 @@ GE_PROJECT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../
 @dag(
     dag_id='dsp_data_processing',
     start_date=datetime(2024, 1, 1),
-    schedule_interval='*/1 * * * *',
+    schedule_interval='*/5 * * * *',
     tags=['DSP'],
     catchup=False
 )
@@ -45,102 +45,54 @@ def file_processing_dag():
         valid_files = []
         invalid_files = []
 
+        # Load the Expectation Suite
+        expectation_suite = context.get_expectation_suite(expectation_suite_name="validation_test")
+
         for file_path in file_paths:
             data_asset_name = os.path.basename(file_path)
 
-            # Create a batch request for the file
-            # batch_request = {
-            #     # 'datasource_name': 'infected_second_test',  # Update these with your Great Expectations setup
-            #     # 'data_connector_name': 'default_inferred_data_connector_name',
-            #     # 'data_asset_name': data_asset_name,  # Use the filename as the data asset name
-            #     # 'runtime_parameters': {'batch_data': file_path},  # Pass the file path dynamically
-            #     # 'batch_spec_passthrough': {'reader_options': {'header': True}},
-            #     # 'batch_identifiers': {'default_identifier': 'default'}  # Adding batch_identifiers
-            # }
-            
-            # Run the validation
-            checkpoint_name = 'test_validation_2'  # Update this to your actual checkpoint name
-            yaml_config = f"""
-name: {checkpoint_name}
-config_version: 1.0
-template_name:
-module_name: great_expectations.checkpoint
-class_name: Checkpoint
-run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
-expectation_suite_name: validation_test
-batch_request: {{}}
-action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
-  - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
-  - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-      site_names: []
-evaluation_parameters: {{}}
-runtime_configuration: {{}}
-validations:
-  - batch_request:
-      datasource_name: infected_second_test
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: {data_asset_name}
-    expectation_suite_name: validation_test
-profilers: []
-ge_cloud_id:
-expectation_suite_ge_cloud_id:
-"""
+            # Load the file as a DataFrame
+            df = pd.read_csv(file_path)
+            batch = ge.dataset.PandasDataset(df)
 
-            with open('/Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DSP/great_expectations/checkpoints/test_validation_2.yml', 'w') as yaml_file:
-                yaml_file.write(yaml_config)
-                # print(f"Saved YAML configuration to {yaml_file_path}")
-            
-            # yaml = YAML()
-            # context.add_checkpoint(**yaml.load(yaml_config))
+            # Validate the DataFrame against the loaded Expectation Suite
+            result = batch.validate(expectation_suite=expectation_suite)
 
-            result = context.run_checkpoint(
-                checkpoint_name=checkpoint_name
-                # batch_request=batch_request
-                # expectation_suite_name="validation_test",
-                # validations=[
-                #     {
-                #         "batch_request": batch_request
-                #     }
-                # ]
-            )
+            invalid_indices = set()
 
-            # Check if the validation passed
-            if result.success:
-                print(f"{file_path} passed validation.")
-                valid_files.append(file_path)
-            else:
-                print(f"{file_path} failed validation.")
-                invalid_files.append(file_path)
+            # Loop through validation results to collect invalid row indices
+            for validation in result['results']:
+                if not validation['success']:
+                    # Collect the list of invalid row indices for the failed expectations
+                    unexpected_indices = validation['result'].get('unexpected_index_list', [])
+                    invalid_indices.update(unexpected_indices)
+
+            # Separate valid and invalid rows
+            valid_rows_df = df.drop(list(invalid_indices))
+            invalid_rows_df = df.iloc[list(invalid_indices)]
+
+            if not valid_rows_df.empty:
+                valid_files.append((valid_rows_df, file_path))
+            if not invalid_rows_df.empty:
+                invalid_files.append((invalid_rows_df, file_path))
 
             break
 
         return {"valid": valid_files, "invalid": invalid_files}
 
-
     @task
     def save_file(validation_result):
-        # Move valid files to the good-data folder
-        for valid_file in validation_result['valid']:
-            destination = os.path.join(GOOD_DATA_PATH, os.path.basename(valid_file))
-            if os.path.exists(destination):
-                os.remove(destination)
-            shutil.move(valid_file, GOOD_DATA_PATH)
-            print(f"Moved {valid_file} to {GOOD_DATA_PATH}")
+        # Save valid rows to the good-data folder
+        for valid_data, original_file in validation_result['valid']:
+            destination = os.path.join(GOOD_DATA_PATH, os.path.basename(original_file))
+            valid_data.to_csv(destination, index=False)
+            print(f"Saved valid data to {destination}")
 
-        # Move invalid files to the bad-data folder
-        for invalid_file in validation_result['invalid']:
-            destination = os.path.join(BAD_DATA_PATH, os.path.basename(invalid_file))
-            if os.path.exists(destination):
-                os.remove(destination)
-            shutil.move(invalid_file, BAD_DATA_PATH)
-            print(f"Moved {invalid_file} to {BAD_DATA_PATH}")
+        # Save invalid rows to the bad-data folder
+        for invalid_data, original_file in validation_result['invalid']:
+            destination = os.path.join(BAD_DATA_PATH, os.path.basename(original_file))
+            invalid_data.to_csv(destination, index=False)
+            print(f"Saved invalid data to {destination}")
 
     # Define task dependencies
     file_paths = read_data()
