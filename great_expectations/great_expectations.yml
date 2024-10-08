@@ -99,7 +99,7 @@ datasources:
           pattern: (.*)
         module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetFilesystemDataConnector
-        base_directory: /Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DSP/data/raw-data
+        base_directory: /Users/wasedoo/Documents/EPITA/M2/DSP/DSP-Project/data/raw-data # path change
       default_runtime_data_connector_name:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector

@@ -4,7 +4,7 @@ import os
 import shutil
 from airflow.exceptions import AirflowSkipException
 import great_expectations as ge
-from ruamel.yaml import YAML
+# from ruamel.yaml import YAML
 
 # Define paths
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/")
@@ -93,7 +93,7 @@ ge_cloud_id:
 expectation_suite_ge_cloud_id:
 """
 
-            with open('/Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DSP/great_expectations/checkpoints/test_validation_2.yml', 'w') as yaml_file:
+            with open('/Users/wasedoo/Documents/EPITA/M2/DSP/DSP-Project/great_expectations/checkpoints/test_validation_2.yml', 'w') as yaml_file:
                 yaml_file.write(yaml_config)
                 # print(f"Saved YAML configuration to {yaml_file_path}")
             
