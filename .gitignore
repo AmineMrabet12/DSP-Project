@@ -5,16 +5,17 @@ __pycache__/
 
 # data
 # data/*.csv
-airflow/airflow.db
+# airflow/airflow.db
 
 # data
 # data/*.csv
-airflow/airflow.db
+# airflow/airflow.db
 .idea/
 .env
 # data
 data/*/*.csv
 airflow/airflow.db
+airflow/airflow.cfg
 
 # C extensions
 *.so
