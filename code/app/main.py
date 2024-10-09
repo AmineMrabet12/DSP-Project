@@ -50,7 +50,7 @@ model = load('../../models/grid_search.joblib')
 
 @app.on_event("startup")
 async def startup():
-    await database.connect()   
+    await database.connect()
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -58,24 +58,30 @@ async def shutdown():
 
 
 @app.post("/predict")
-async def predict(input_data_list: Union[ModelInput, List[ModelInput]], request: Request):  # Accept a list of input data
+async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
+                  request: Request):  # Accept a list of input data
 
     source_prediction = "Scheduled Predictions"  # Default for Airflow
     if request.headers.get("X-Source") == "streamlit":
         source_prediction = "Web Application"
 
     # print(input_data_list)
-    if isinstance(input_data_list, list):  
+    if isinstance(input_data_list, list):
         input_data_dicts = [item.dict() for item in input_data_list]
     else:
         input_data_dicts = [input_data_list.dict()]
 
-    # input_data_dicts = [input_data.json() for input_data in input_data_list]#[0]
-    # print(input_data_dicts)
-    # input_data_dicts = [input_data.dict() for input_data in input_data_list]
-
     # Convert input data to DataFrame
     input_df = pd.DataFrame(input_data_dicts)
+    customer_ids = input_df.customerID.tolist()
+
+    query = predictions.select().where(predictions.c.customerID.in_(customer_ids))
+    existing_predictions = await database.fetch_all(query)
+
+    if existing_predictions:
+        existing_predictions_parsed = [dict(result) for result in existing_predictions]
+        return existing_predictions_parsed
+
     # print(input_df)
 
     # Load preprocessing tools and column configurations
@@ -88,7 +94,8 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]], request:
     input_df = input_df[columns]
 
     # Apply transformations
-    input_df[categorical_columns] = ordinal.transform(input_df[categorical_columns])
+    input_df[categorical_columns] = ordinal.transform(
+        input_df[categorical_columns])
     input_df = scaler.transform(input_df)
 
     # Make predictions for all rows at once
@@ -103,14 +110,13 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]], request:
         input_data_dicts[idx]["date"] = current_time
         input_data_dicts[idx]["SourcePrediction"] = source_prediction
 
-        
         query = predictions.insert().values(
             **input_data_dicts[idx]
         )
         await database.execute(query)
 
-    return {"predictions": predictions_values}
-
+    # return {"predictions": predictions_values}
+    return predictions_values
 
 # @app.get("/past_predictions/")
 # async def get_predictions():
@@ -126,7 +132,9 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]], request:
 
 
 @app.get("/past_predictions/")
-async def get_predictions(start_date: str = Query(None), end_date: str = Query(None), source: str = Query(None)):
+async def get_predictions(start_date: str = Query(None),
+                          end_date: str = Query(None),
+                          source: str = Query(None)):
     # Convert string dates to datetime objects
     if start_date:
         start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
