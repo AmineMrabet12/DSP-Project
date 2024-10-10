@@ -92,7 +92,7 @@ elif option == "CSV File Upload":
                 predictions = response.json()
                 if len(predictions) > 0:
                     predictions_df = pd.DataFrame(predictions)
-                    if 'date' and 'SourcePrediction' in predictions_df.columns:
+                    if 'date' in predictions_df.columns and 'SourcePrediction' in predictions_df.columns:
                         # No past predictions found. New predictions here
                         st.write(predictions_df.drop(
                             columns=['date', 'SourcePrediction']))
