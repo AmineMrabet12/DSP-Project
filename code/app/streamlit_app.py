@@ -62,7 +62,10 @@ if option == "Manual Input":
         response = requests.post(FASTAPI_PREDICT_URL, json=user_input, headers={"X-Source": "streamlit"})
         if response.status_code == 200:
             # st.success(f"Prediction: {response.json()['predictions'][0]}")
-            st.success(f"Prediction: {response.json()[0]}")
+            st.success(f"Prediction: {response.json()['predictions'][0]}")
+            user_input['prediction'] = response.json()['predictions'][0]
+            st.write(pd.DataFrame([user_input]))
+            # st.write(user_input)
         else:
             st.error("Error: Unable to get prediction")
 
@@ -87,15 +90,28 @@ elif option == "CSV File Upload":
             response = requests.post(FASTAPI_PREDICT_URL, json=data, headers={"X-Source": "streamlit"})
 
             if response.status_code == 200:
-
-                predictions = response.json().get('predictions', [])
-                csv_data['Prediction'] = predictions
-                try:
+                result = response.json()
+                if "existing_data" in result:
+                    st.error("CustomerIDs already exist in the database:")
+                    dd = pd.DataFrame(result["existing_data"])
+                    st.write(pd.DataFrame(result["existing_data"]))
+                else:
+                    st.success("Predictions:")
+                    # predictions = response.json().get('predictions', [])
+                    csv_data['Prediction'] = result["predictions"]
                     st.write(csv_data.drop(columns=['Churn']))
-                except:
-                    st.write(csv_data)
+                    # st.write(result["predictions"])
             else:
-                st.error("Error: Unable to get predictions.")
+                st.error("Error in processing the prediction request.")
+
+            #     predictions = response.json().get('predictions', [])
+            #     csv_data['Prediction'] = predictions
+            #     try:
+            #         st.write(csv_data.drop(columns=['Churn']))
+            #     except:
+            #         st.write(csv_data)
+            # else:
+            #     st.error("Error: Unable to get predictions.")
             # csv_data['Prediction'] = predictions
             # st.write(csv_data)
 

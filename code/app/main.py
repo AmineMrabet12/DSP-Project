@@ -68,21 +68,53 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
     # print(input_data_list)
     if isinstance(input_data_list, list):
         input_data_dicts = [item.dict() for item in input_data_list]
+        input_df = pd.DataFrame(input_data_dicts)
+
+        customer_ids = input_df['customerID'].tolist()
+
+        # Query to check if these CustomerIDs already exist
+        query = f"""
+            select * from past_predictions where past_predictions."customerID" in {tuple(customer_ids)}
+        """
     else:
         input_data_dicts = [input_data_list.dict()]
+        input_df = pd.DataFrame(input_data_dicts)
+
+        customer_ids = input_df['customerID'].tolist()
+        # print(customer_ids)
+
+        # Query to check if these CustomerIDs already exist
+        query = f"""
+            select * from past_predictions where past_predictions."customerID" = '{customer_ids[0]}'
+        """
 
     # Convert input data to DataFrame
-    input_df = pd.DataFrame(input_data_dicts)
-    # customer_ids = input_df.customerID.tolist()
+#     input_df = pd.DataFrame(input_data_dicts)
 
-    # query = predictions.select().where(predictions.c.customerID.in_(customer_ids))
-    # existing_predictions = await database.fetch_all(query)
+#     customer_ids = input_df['customerID'].tolist()
 
-    # if existing_predictions:
-    #     existing_predictions_parsed = [dict(result) for result in existing_predictions]
-    #     return existing_predictions_parsed
+#     # Query to check if these CustomerIDs already exist
+#     query = f"""
+#     select * from past_predictions where past_predictions."customerID" in {tuple(customer_ids)}
+# """
+    # print(query)
+    # query = select([predictions]).where(predictions.c.customerID.in_(customer_ids))
+    existing_records = await database.fetch_all(query)
 
-    # print(input_df)
+    if existing_records:
+        # Convert the results to a DataFrame
+        existing_df = pd.DataFrame(existing_records)
+        # print(existing_df)
+        l = list(input_df.columns)
+        l.append('prediction')
+        # print(l)
+        existing_df = existing_df[l]
+
+        # Return a message with the existing CustomerIDs and associated data
+        return {
+            "message": "The following CustomerIDs already exist:",
+            "existing_data": existing_df.to_dict(orient='records')
+        }
 
     # Load preprocessing tools and column configurations
     ordinal = load('../../models/Ordinal_Encoder.joblib')
@@ -115,19 +147,6 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
         await database.execute(query)
 
     return {"predictions": predictions_values} 
-    # return predictions_values
-
-# @app.get("/past_predictions/")
-# async def get_predictions():
-#         query = predictions.select()
-#         results = await database.fetch_all(query)
-
-#         parsed_results = [
-#                 dict(result)
-#                 for result in results
-#         ]
-
-#         return parsed_results
 
 
 @app.get("/past_predictions/")
