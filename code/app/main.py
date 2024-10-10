@@ -112,8 +112,9 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
 
         # Return a message with the existing CustomerIDs and associated data
         return {
-            "message": "The following CustomerIDs already exist:",
-            "existing_data": existing_df.to_dict(orient='records')
+            "message": "CustomerIDs already exist",
+            "existing_data": True,
+            "predictions": existing_df.to_dict(orient='records')
         }
 
     # Load preprocessing tools and column configurations

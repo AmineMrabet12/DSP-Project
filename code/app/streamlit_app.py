@@ -93,8 +93,8 @@ elif option == "CSV File Upload":
                 result = response.json()
                 if "existing_data" in result:
                     st.error("CustomerIDs already exist in the database:")
-                    dd = pd.DataFrame(result["existing_data"])
-                    st.write(pd.DataFrame(result["existing_data"]))
+                    dd = pd.DataFrame(result["predictions"])
+                    st.write(pd.DataFrame(result["predictions"]))
                 else:
                     st.success("Predictions:")
                     # predictions = response.json().get('predictions', [])
