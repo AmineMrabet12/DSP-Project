@@ -114,8 +114,8 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
         )
         await database.execute(query)
 
-    # return {"predictions": predictions_values}
-    return predictions_values
+    return {"predictions": predictions_values} 
+    # return predictions_values
 
 # @app.get("/past_predictions/")
 # async def get_predictions():
