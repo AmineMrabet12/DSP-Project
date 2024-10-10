@@ -73,14 +73,14 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
 
     # Convert input data to DataFrame
     input_df = pd.DataFrame(input_data_dicts)
-    customer_ids = input_df.customerID.tolist()
+    # customer_ids = input_df.customerID.tolist()
 
-    query = predictions.select().where(predictions.c.customerID.in_(customer_ids))
-    existing_predictions = await database.fetch_all(query)
+    # query = predictions.select().where(predictions.c.customerID.in_(customer_ids))
+    # existing_predictions = await database.fetch_all(query)
 
-    if existing_predictions:
-        existing_predictions_parsed = [dict(result) for result in existing_predictions]
-        return existing_predictions_parsed
+    # if existing_predictions:
+    #     existing_predictions_parsed = [dict(result) for result in existing_predictions]
+    #     return existing_predictions_parsed
 
     # print(input_df)
 
@@ -94,8 +94,7 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
     input_df = input_df[columns]
 
     # Apply transformations
-    input_df[categorical_columns] = ordinal.transform(
-        input_df[categorical_columns])
+    input_df[categorical_columns] = ordinal.transform(input_df[categorical_columns])
     input_df = scaler.transform(input_df)
 
     # Make predictions for all rows at once

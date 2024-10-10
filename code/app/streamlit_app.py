@@ -86,36 +86,18 @@ elif option == "CSV File Upload":
 
             response = requests.post(FASTAPI_PREDICT_URL, json=data, headers={"X-Source": "streamlit"})
 
-            # for row in data:
-                # response = requests.post(FASTAPI_PREDICT_URL, json=row)
             if response.status_code == 200:
-                predictions = response.json()
-                if len(predictions) > 0:
-                    predictions_df = pd.DataFrame(predictions)
-                    if 'date' in predictions_df.columns and 'SourcePrediction' in predictions_df.columns:
-                        # No past predictions found. New predictions here
-                        st.write(predictions_df.drop(
-                            columns=['date', 'SourcePrediction']))
-                    else:
-                        # Past Predictions already existed.
-                        csv_data['Prediction'] = predictions
-                        st.write(csv_data)
 
-                else:
-                    st.write("error")
+                predictions = response.json().get('predictions', [])
+                csv_data['Prediction'] = predictions
+                try:
+                    st.write(csv_data.drop(columns=['Churn']))
+                except:
+                    st.write(csv_data)
             else:
-                st.error("Failed to fetch past predictions.")
-
-            #     predictions = response.json().get('predictions', [])
-            #     csv_data['Prediction'] = predictions
-            #     try:
-            #         st.write(csv_data.drop(columns=['Churn']))
-            #     except:
-            #         st.write(csv_data)
-            # else:
-            #     st.error("Error: Unable to get predictions.")
-            # # csv_data['Prediction'] = predictions
-            # # st.write(csv_data)
+                st.error("Error: Unable to get predictions.")
+            # csv_data['Prediction'] = predictions
+            # st.write(csv_data)
 
 
 elif option == "View Past Predictions":
