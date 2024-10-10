@@ -14,7 +14,7 @@ GOOD_DATA_PATH = os.path.join(data_path, "good-data")
 BAD_DATA_PATH = os.path.join(data_path, "bad-data")
 
 # Define the path to your Great Expectations project
-GE_PROJECT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../great_expectations/")
+GE_PROJECT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../gx/")
 
 @dag(
     dag_id='dsp_data_processing',
@@ -63,7 +63,7 @@ def file_processing_dag():
             # }
             
             # Run the validation
-            checkpoint_name = 'test_validation_2'  # Update this to your actual checkpoint name
+            checkpoint_name = 'DSP-validator'  # Update this to your actual checkpoint name
             yaml_config = f"""
 name: {checkpoint_name}
 config_version: 1.0
@@ -88,10 +88,10 @@ evaluation_parameters: {{}}
 runtime_configuration: {{}}
 validations:
   - batch_request:
-      datasource_name: infected_second_test
+      datasource_name: DSP-datasource
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: {data_asset_name}
-    expectation_suite_name: validation_test
+    expectation_suite_name: DSP-Suite
 profilers: []
 ge_cloud_id:
 expectation_suite_ge_cloud_id:

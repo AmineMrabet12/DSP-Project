@@ -24,15 +24,9 @@ validations:
   - batch_request:
       datasource_name: infected_second_test
       data_connector_name: default_inferred_data_connector_name
-      data_asset_name: data_part_8.csv
+      data_asset_name: data_part_10.csv
     expectation_suite_name: validation_test
-    result_format:
-      result_format: COMPLETE
-      include_unexpected_rows: True
-      return_unexpected_index_query: True
-      unexpected_index_query: True
-      unexpected_index_list: True
-      unexpected_list: True
+    result_format: COMPLETE
 profilers: []
 ge_cloud_id:
 expectation_suite_ge_cloud_id:
