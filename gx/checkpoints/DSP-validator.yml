@@ -1,10 +1,10 @@
-name: data_part_6.csv
+name: DSP-validator
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
-class_name: Checkpoint
+class_name: SimpleCheckpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
-expectation_suite_name: validation_test
+expectation_suite_name:
 batch_request: {}
 action_list:
   - name: store_validation_result
@@ -20,10 +20,19 @@ evaluation_parameters: {}
 runtime_configuration: {}
 validations:
   - batch_request:
-      datasource_name: infected_second_test
+      datasource_name: DSP-datasource
       data_connector_name: default_inferred_data_connector_name
-      data_asset_name: data_part_6.csv
-      expectation_suite_name: validation_test
+      # data_asset_name: (*.csv) # <data_asset_name>
+      data_connector_query:
+        index: -1
+    expectation_suite_name: DSP-Suite
+    result_format:
+      result_format: COMPLETE
+      # include_unexpected_rows: True
+      # return_unexpected_index_query: True
+      # unexpected_index_query: True
+      # unexpected_index_list: True
+      # unexpected_list: True
 profilers: []
 ge_cloud_id:
 expectation_suite_ge_cloud_id:
