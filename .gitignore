@@ -16,6 +16,7 @@ __pycache__/
 data/*/*.csv
 airflow/airflow.db
 airflow/airflow.cfg
+airflow/logs
 
 # C extensions
 *.so

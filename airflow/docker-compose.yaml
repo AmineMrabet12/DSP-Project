@@ -24,6 +24,7 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+    command: "airflow webserver"  # Add this line to specify the correct command
     networks:
       - airflow_network
 
@@ -38,6 +39,7 @@ services:
       - ./plugins:/opt/airflow/plugins
     depends_on:
       - webserver  # Corrected dependency
+    command: "airflow scheduler"  # Add this line to start the scheduler
     networks:
       - airflow_network
 
