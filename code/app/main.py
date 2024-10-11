@@ -10,7 +10,7 @@ from fastapi import Query
 from sqlalchemy import select
 from sqlalchemy.sql import and_
 from datetime import date, datetime
-from sqlalchemy.engine import processors
+# from sqlalchemy.engine import processors
 from sqlalchemy import create_engine
 
 app = FastAPI()
