@@ -11,7 +11,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-csv_path = '../../data/churn.csv'
+csv_path = '/Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DSP/data/churn.csv' # 'data/churn.csv'
 df = pd.read_csv(csv_path)
 
 df = df.apply(pd.to_numeric, errors='ignore')
@@ -67,6 +67,25 @@ predictions = Table(
 )
 
 # Create the table in the database
+print("Predictions table created successfully.")
+
+# Add the new table for statistics
+statistics = Table(
+    "prediction_statistics",
+    metadata,
+    Column('run_id', String, primary_key=True),
+    Column('run_time', DateTime, default=datetime.datetime.utcnow),
+    Column('evaluated_expectations', Integer),
+    Column('successful_expectations', Integer),
+    Column('unsuccessful_expectations', Integer),
+    Column('success_percent', Float),
+    Column('datasource_name', String),
+    Column('checkpoint_name', String),
+    Column('expectation_suite_name', String),
+    Column('file_name', String)
+)
+
+# Create the statistics table
 metadata.create_all(engine)
 
-print("Table created successfully.")
+print("Statistics table created successfully.")

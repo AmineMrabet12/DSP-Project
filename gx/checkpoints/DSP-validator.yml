@@ -22,7 +22,7 @@ validations:
   - batch_request:
       datasource_name: DSP-datasource
       data_connector_name: default_inferred_data_connector_name
-      data_asset_name: data_part_10.csv
+      # data_asset_name: (*.csv) # <data_asset_name>
       data_connector_query:
         index: -1
     expectation_suite_name: DSP-Suite
