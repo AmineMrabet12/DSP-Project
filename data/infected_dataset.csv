@@ -1,4 +1,3 @@
-customerID,gender,SeniorCitizen,Partner,Dependents,tenure,PhoneService,MultipleLines,InternetService,OnlineSecurity,OnlineBackup,DeviceProtection,TechSupport,StreamingTV,StreamingMovies,Contract,PaperlessBilling,PaymentMethod,MonthlyCharges,TotalCharges,Churn
 7590-VHVEG,Female,0.0,InvalidCategory,No,1.0,No,No phone service,DSL,No,Yes,No,No,,No,Month-to-month,Yes,InvalidCategory,29.85,29.85,No
 ,Male,0.0,No,No,34.0,Yes,No,nan-badformat,Yes,No,Yes,No,,No,One year,No,Mailed check,56.95,1889.5,No
 3668-QPYBK,Male,0.0,No,,2.0,Yes,No,,Yes,Yes,InvalidCategory,InvalidCategory,No,No,Month-to-month,,Mailed check,53.85,108.15,Yes
