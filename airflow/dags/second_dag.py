@@ -1,20 +1,13 @@
 from airflow.decorators import dag, task
 from datetime import datetime
 import os
-import shutil
 import sys
 import great_expectations as ge
-import pandas as pd
 from airflow.exceptions import AirflowSkipException
-from great_expectations_provider.operators.great_expectations import GreatExpectationsOperator
 from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import sessionmaker
 import requests
 import json
-from great_expectations.core.batch import BatchRequest
-from great_expectations.data_context import DataContext
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.core import ExpectationSuite
 from dotenv import load_dotenv
 
 load_dotenv()

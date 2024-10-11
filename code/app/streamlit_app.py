@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-import uuid
 import random
 import os
 import string

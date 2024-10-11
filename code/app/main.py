@@ -7,7 +7,6 @@ from models import predictions
 from joblib import load
 from typing import List, Union
 from fastapi import Query
-from sqlalchemy import select
 from sqlalchemy.sql import and_
 from datetime import date, datetime
 
