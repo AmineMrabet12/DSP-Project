@@ -6,12 +6,16 @@ import os
 import requests
 import pandas as pd
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/")
 GOOD_DATA_FOLDER = os.path.join(data_path, "good-data")
 PROCESSED_FILES_PATH = os.path.join(data_path, "processed_files.json")
 
-MODEL_API_URL = "http://localhost:8000/predict"
+# MODEL_API_URL = "http://localhost:8000/predict"
+MODEL_API_URL = os.getenv('FASTAPI_PREDICT_URL')
 
 def load_processed_files():
     if os.path.exists(PROCESSED_FILES_PATH):

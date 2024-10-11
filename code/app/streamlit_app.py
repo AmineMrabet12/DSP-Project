@@ -3,10 +3,17 @@ import pandas as pd
 import requests
 import uuid
 import random
+import os
 import string
+from dotenv import load_dotenv
 
-FASTAPI_PREDICT_URL = "http://localhost:8000/predict/"
-FASTAPI_PAST_PREDICTIONS_URL = "http://localhost:8000/past_predictions/"
+load_dotenv()
+
+FASTAPI_PREDICT_URL = os.getenv('FASTAPI_PREDICT_URL')
+FASTAPI_PAST_PREDICTIONS_URL = os.getenv('FASTAPI_PAST_PREDICTIONS_URL')
+
+# FASTAPI_PREDICT_URL = "http://localhost:8000/predict/"
+# FASTAPI_PAST_PREDICTIONS_URL = "http://localhost:8000/past_predictions/"
 
 st.title("Prediction Web App")
 
