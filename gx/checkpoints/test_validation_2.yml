@@ -1,4 +1,5 @@
-name: data_part_4.csv
+
+name: test_validation_2
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
@@ -16,14 +17,16 @@ action_list:
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
+      site_names: []
 evaluation_parameters: {}
 runtime_configuration: {}
 validations:
   - batch_request:
       datasource_name: infected_second_test
       data_connector_name: default_inferred_data_connector_name
-      data_asset_name: data_part_4.csv
-      expectation_suite_name: validation_test
+      data_asset_name: data_part_10.csv
+    expectation_suite_name: validation_test
+    result_format: COMPLETE
 profilers: []
 ge_cloud_id:
 expectation_suite_ge_cloud_id:
