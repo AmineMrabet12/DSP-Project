@@ -1,5 +1,13 @@
 # Data Science in Production
 
+## Project Architecture
+<p align="center">
+    <img
+        src="img.png"
+        alt="Project architecture"
+    />
+</p>
+
 ## Table of Contents
 
 1. [About this README](#about-this-readme)
@@ -36,13 +44,21 @@ Make sure you have the following installed:
     ```bash
     git clone <your-repo-url>
     cd <your-repo-folder>
+    ```
+
 2. **Create a Virtual Environment**
     ```bash
     conda create --name myenv python=3.9
     ```
+
 3. **Activate the Conda Environment**
     ```bash
     conda activate myenv
+    ```
+
+4. **Install Required Packages**
+    ```bash
+    pip install -r requirements.txt
     ```
 
 ## Setting Up PostgreSQL
@@ -65,25 +81,25 @@ Make sure you have the following installed:
 4. **Exit PostgreSQL**
     ```bash
     \q
-    ````
+    ```
 
 5. **Login to PostgreSQL with new User**
     ```bash
     psql -U <user_name> -d <your_database_name>
-    ````
+    ```
 
 ## Configure Airflow
 
 1. **Export the Airflow Home Directory**
     ```bash
     export AIRFLOW_HOME=${PWD}/airflow
-    ````
+    ```
 2. **Initialize the Airflow database**
     ```bash
     airflow db init
     ```
 
-3. **Create airflow user**
+3. **Create Airflow User**
     ```bash
     airflow users create \
     --username admin \
@@ -93,10 +109,11 @@ Make sure you have the following installed:
     --email admin@admin.com \
     --password admin
     ```
+
 ## Start Airflow
 
 Don't forget to always `export AIRFLOW_HOME=${PWD}/airflow`
-1. **Start scheduler & server**
+1. **Start Scheduler & Server**
     ```bash
     airflow scheduler &
     airflow webserver --port 8080
@@ -123,7 +140,7 @@ Don't forget to always `export AIRFLOW_HOME=${PWD}/airflow`
     ```bash
     fastapi dev main.py
     ```
-    *You can access the FastAPI UI at* `http:/localhost:8000/docs`.
+    *You can access the FastAPI UI at* `http://localhost:8000/docs`.
 
 ## Run Streamlit
 
@@ -144,6 +161,7 @@ Don't forget to always `export AIRFLOW_HOME=${PWD}/airflow`
 ![Airflow](https://img.shields.io/badge/Airflow-2.1.4-orange?logo=apacheairflow&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14.0-blue?logo=postgresql&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.3.0-blue?logo=streamlit&logoColor=white)
+![Great Expectations](https://img.shields.io/badge/Great%20Expectations-0.15.0-orange?logo=great-expectations&logoColor=white)
 
 ## Collaborators
 <center>
@@ -161,4 +179,4 @@ Don't forget to always `export AIRFLOW_HOME=${PWD}/airflow`
 ### Notes:
 - Replace `<your-repo-url>` with the actual URL of your repository.
 - Replace `<your_database_name>`, `user_name` and `<your_password>` with the desired database name and password.
-- Update any paths as needed to fit your project's structure. 
+- Update any paths as needed to fit your project's structure.
