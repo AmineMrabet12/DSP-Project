@@ -715,8 +715,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -827,6 +826,7 @@
           }
         }
       ],
+      "transparent": true,
       "type": "bargauge"
     },
     {
@@ -845,8 +845,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -942,6 +941,7 @@
           }
         }
       ],
+      "transparent": true,
       "type": "bargauge"
     },
     {
@@ -962,8 +962,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1049,6 +1048,7 @@
         }
       ],
       "title": "Total of Successful validated rows",
+      "transparent": true,
       "type": "bargauge"
     },
     {
@@ -1069,8 +1069,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1156,6 +1155,7 @@
         }
       ],
       "title": "Total of Successful validated columns",
+      "transparent": true,
       "type": "bargauge"
     },
     {
@@ -1176,8 +1176,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1263,6 +1262,7 @@
         }
       ],
       "title": "Total of Unsuccessful validated rows",
+      "transparent": true,
       "type": "bargauge"
     },
     {
@@ -1283,8 +1283,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1370,6 +1369,7 @@
         }
       ],
       "title": "Total of Unuccessful validated columns",
+      "transparent": true,
       "type": "bargauge"
     }
   ],
@@ -1387,6 +1387,6 @@
   "timezone": "browser",
   "title": "statistics",
   "uid": "ee0giwyona22ob",
-  "version": 4,
+  "version": 5,
   "weekStart": ""
 }
