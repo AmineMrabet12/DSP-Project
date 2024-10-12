@@ -1,5 +1,13 @@
 # Data Science in Production
 
+## Project Architecture
+<p align="center">
+    <img
+        src="img.png"
+        alt="Project architecture"
+    />
+</p>
+
 ## Table of Contents
 
 1. [About this README](#about-this-readme)
