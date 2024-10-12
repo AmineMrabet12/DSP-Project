@@ -9,6 +9,8 @@ from typing import List, Union
 from fastapi import Query
 from sqlalchemy.sql import and_
 from datetime import date, datetime
+# from sqlalchemy.engine import processors
+from sqlalchemy import create_engine
 
 app = FastAPI()
 
@@ -177,3 +179,4 @@ async def get_predictions(start_date: str = Query(None),
     parsed_results = [dict(result) for result in results]
 
     return parsed_results
+

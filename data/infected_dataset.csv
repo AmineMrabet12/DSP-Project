@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+7590-VHVEG,Female,0.0,InvalidCategory,No,1.0,No,No phone service,DSL,No,Yes,No,No,,No,Month-to-month,Yes,InvalidCategory,29.85,29.85,No
+,Male,0.0,No,No,34.0,Yes,No,nan-badformat,Yes,No,Yes,No,,No,One year,No,Mailed check,56.95,1889.5,No
+3668-QPYBK,Male,0.0,No,,2.0,Yes,No,,Yes,Yes,InvalidCategory,InvalidCategory,No,No,Month-to-month,,Mailed check,53.85,108.15,Yes
+7795-CFOCW,Male-badformat,0.0,No,No,45.0,No,No phone service,DSL,Yes,No,Yes,Yes,No,No,One year,InvalidCategory,Bank transfer (automatic),42.3,1840.75,No-badformat
+9237-HQITU,Female,0.0,No,No,2.0,InvalidCategory,No,Fiber optic,InvalidCategory,No,No,No,No,No,Month-to-month,InvalidCategory,InvalidCategory,70.7,151.65,Yes
+,Female,0.0,No,No,8.0,Yes,Yes,,No,No,Yes,,Yes,Yes,Month-to-month,InvalidCategory,InvalidCategory,99.65,InvalidCategory,Yes
+1452-KIOVK,Male,0.0,No-badformat,InvalidCategory,22.0,Yes,Yes,Fiber optic,No,Yes,No,No,Yes,No,Month-to-month,Yes,Credit card (automatic),89.1,InvalidCategory,No
+6713-OKOMC,Female,0.0,No,No,10.0,No,No phone service,DSL,Yes,No,No,No,No,No,Month-to-month-badformat,No,Mailed check,29.75,301.9,No
+=======
 customerID,gender,SeniorCitizen,Partner,Dependents,tenure,PhoneService,MultipleLines,InternetService,OnlineSecurity,OnlineBackup,DeviceProtection,TechSupport,StreamingTV,StreamingMovies,Contract,PaperlessBilling,PaymentMethod,MonthlyCharges,TotalCharges,Churn
 7590-VHVEG,Female,0.0,Yes,No,1.0,No,No phone service,InvalidCategory,No,Yes,No,No,No,No,InvalidCategory,Yes,Electronic check,29.85,29.85,No
 5575-GNVDE,Male,0.0,No,No,34.0,Yes,No,DSL,Yes,No,Yes,No,No,No,One year,No,Mailed check,56.95,1889.5,No
@@ -7,6 +17,7 @@ customerID,gender,SeniorCitizen,Partner,Dependents,tenure,PhoneService,MultipleL
 9305-CDSKC,Female,0.0,No,No,8.0,Yes,Yes,Fiber optic,No,No,Yes,No,Yes,Yes,Month-to-month,Yes,Electronic check,99.65,820.5,Yes
 1452-KIOVK,Male,0.0,No,Yes,22.0,Yes,Yes,Fiber optic,No,Yes,No,No,Yes,No,Month-to-month,Yes,Credit card (automatic),89.1,1949.4,No
 6713-OKOMC,Female,0.0,No,No,10.0,No,No phone service,DSL,Yes,No,No,No,No,No,Month-to-month,No,Mailed check,29.75,301.9,No
+>>>>>>> 625e5d19166686d664ba6eaae8fc262847cc3410
 7892-POOKP,Female,0.0,Yes,No,28.0,Yes,Yes,Fiber optic,No,No,Yes,Yes,Yes,Yes,Month-to-month,Yes,Electronic check,104.8,3046.05,Yes
 6388-TABGU,Male,0.0,No,Yes,62.0,Yes,No,DSL,Yes,Yes,No,No,No,No,One year,No,Bank transfer (automatic),56.15,3487.95,No
 9763-GRSKD,Male,0.0,Yes,Yes,13.0,Yes,No,DSL,Yes,No,No,No,No,No,Month-to-month,Yes,Mailed check,49.95,587.45,No
