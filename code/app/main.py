@@ -88,17 +88,6 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
             select * from past_predictions where past_predictions."customerID" = '{customer_ids[0]}'
         """
 
-    # Convert input data to DataFrame
-#     input_df = pd.DataFrame(input_data_dicts)
-
-#     customer_ids = input_df['customerID'].tolist()
-
-#     # Query to check if these CustomerIDs already exist
-#     query = f"""
-#     select * from past_predictions where past_predictions."customerID" in {tuple(customer_ids)}
-# """
-    # print(query)
-    # query = select([predictions]).where(predictions.c.customerID.in_(customer_ids))
     existing_records = await database.fetch_all(query)
 
     if existing_records:

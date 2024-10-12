@@ -13,8 +13,6 @@ load_dotenv()
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/")
 GOOD_DATA_FOLDER = os.path.join(data_path, "good-data")
 PROCESSED_FILES_PATH = os.path.join(data_path, "processed_files.json")
-
-# MODEL_API_URL = "http://localhost:8000/predict"
 MODEL_API_URL = os.getenv('FASTAPI_PREDICT_URL')
 
 def load_processed_files():
@@ -22,7 +20,7 @@ def load_processed_files():
         try:
             with open(PROCESSED_FILES_PATH, 'r') as file:
                 content = file.read().strip()
-                if not content:  # Check if file is empty
+                if not content:
                     return {}
                 return json.loads(content)
         except json.JSONDecodeError:
@@ -76,14 +74,8 @@ def make_predictions(**kwargs):
 
             data_json = df.to_dict(orient='records')
 
-            # for row in data_json:
-            # data_json["SourcePrediction"] = "Scheduled Predictions"
-
             response = requests.post(MODEL_API_URL, json=data_json, headers={"X-Source": "airflow"})
 
-
-            # for row in data_json:
-                # response = requests.post(MODEL_API_URL, json=row)
             if response.status_code == 200:
                 if "message" in response.json():
                     predictions.append(response.json()['message']+' '+ f'for {file}')

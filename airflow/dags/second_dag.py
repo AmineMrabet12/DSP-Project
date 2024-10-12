@@ -74,7 +74,7 @@ def file_processing_dag():
                 # "data_connector_query": {"index": -1}
             }
 
-            checkpoint_name = "DSP-validator"  # Update to your actual checkpoint name
+            checkpoint_name = "DSP-validator"
             checkpoint_result = context.run_checkpoint(
                 checkpoint_name=checkpoint_name,
                 batch_request=batch_request
@@ -110,24 +110,19 @@ def file_processing_dag():
     @task
     def save_statistics(file_path, validation_result, results):
         data_asset_name = os.path.basename(file_path)
-        # run_results = validation_result["run_results"]
-        # validation_key = next(iter(run_results))  # Since the key is dynamically generated
 
-        # validation_result = run_results[validation_key]["validation_result"]
-        # validation_result = run_results[validation_key]["validation_result"]
         statistics_val = validation_result["statistics"]
         run_id = validation_result["meta"]["run_id"]
         datasource_name = validation_result["meta"]["active_batch_definition"]["datasource_name"]
         expectation_suite_name = validation_result["meta"]["expectation_suite_name"]
         checkpoint_name = validation_result["meta"]["checkpoint_name"]
-        # file_name = validation_result["meta"]["batch_spec"]["path"]
 
         df = ge.read_csv(file_path)
         nb_rows = df.shape[0]
         nb_cols = df.shape[1]
 
         invalid_columns = set()
-        valid_columns = set(df.columns)  # Assume all columns are valid initially
+        valid_columns = set(df.columns)
 
         # Analyze the validation results to find invalid columns
         for res in validation_result.results:
@@ -170,10 +165,6 @@ def file_processing_dag():
             "nb_invalid_cols": nb_invalid_cols
         }
 
-        # Insert the statistics into the database
-        # with engine.begin() as connection:  # This will automatically commit and rollback
-        #     insert_statement = insert(prediction_statistics_df).values(insert_data)  # Use the DataFrame structure
-        #     connection.execute(insert_statement)
         with Session() as session:
             session.execute(insert(models.statistics).values(**insert_data))
             session.commit()
@@ -195,8 +186,7 @@ def file_processing_dag():
             if "unexpected_index_list" in res.result:
                 unexpected_indexes.extend(res.result["unexpected_index_list"])
 
-        # missing_value_indexes = df[df.isnull().any(axis=1)].index.tolist()
-        unexpected_indexes = sorted(set(unexpected_indexes)) # + missing_value_indexes))
+        unexpected_indexes = sorted(set(unexpected_indexes))
 
         if unexpected_indexes:
             unexpected_rows = df.iloc[unexpected_indexes]
@@ -235,7 +225,6 @@ def file_processing_dag():
         
     def classify_criticality(validation_result):
         success_percent = validation_result["statistics"]["success_percent"]
-        # unsuccessful_expectations = validation_result["statistics"]["unsuccessful_expectations"]
 
         if success_percent < 50: # or unsuccessful_expectations > 10:
             return "high"
@@ -247,16 +236,11 @@ def file_processing_dag():
     @task
     def send_alerts(results, update_data_docs):
         criticality = classify_criticality(results)
-        # print(results)
         suite_name = results["meta"]["expectation_suite_name"]
         file_name = os.path.basename(results["meta"]["batch_spec"]["path"])
         statistics_val = results["statistics"]
-        # run_id = results["meta"]["run_id"]
         datasource_name = results["meta"]["active_batch_definition"]["datasource_name"]
-        # expectation_suite_name = results["meta"]["expectation_suite_name"]
         checkpoint_name = results["meta"]["checkpoint_name"]
-
-        # data_docs_url = results["update_data_docs"]["local_site"]
 
         if not results["success"]:
             message = (
@@ -278,9 +262,9 @@ def file_processing_dag():
 
     # Define task dependencies
     file_paths = read_data()
-    results = validate_data(file_paths)  # Store the results
+    results = validate_data(file_paths)
     send_alerts(results["validation_result"], results["update_data_docs"])
-    save_statistics(results["file_path"], results["validation_result"], results['result'])  # Access file_path and validation_result
+    save_statistics(results["file_path"], results["validation_result"], results['result'])
     save_file(results["file_path"], results['result'])
 
 file_processing = file_processing_dag()
