@@ -104,9 +104,9 @@ default_args = {
 
 # Define the DAG
 with DAG(
-    'check_and_predict',
+    'Prediction_job',
     default_args=default_args,
-    schedule_interval='*/5 * * * *',
+    schedule_interval='*/2 * * * *',
     catchup=False,
 ) as dag:
 

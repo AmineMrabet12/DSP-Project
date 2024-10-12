@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PATH_TO_MODULE = os.getenv('DATABASE_URL')
+PATH_TO_MODULE = os.getenv('PATH_TO_MODULE')
 
 sys.path.append(PATH_TO_MODULE)
 import models
@@ -32,7 +32,7 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 @dag(
-    dag_id='dsp_data_processing_2',
+    dag_id='Data_ingestion',
     start_date=datetime(2024, 1, 1),
     schedule_interval='*/1 * * * *',
     tags=['DSP'],
@@ -80,10 +80,14 @@ def file_processing_dag():
                 batch_request=batch_request
             )
 
+            # print(checkpoint_result)
             run_results = checkpoint_result["run_results"]
+
             validation_key = next(iter(run_results))  # Since the key is dynamically generated
 
             validation_result = run_results[validation_key]["validation_result"]
+
+            update_data_docs = run_results[validation_key]["actions_results"]["update_data_docs"]["local_site"]
 
             # Load the expectation suite
             expectation_suite = context.get_expectation_suite(expectation_suite_name="DSP-Suite")
@@ -98,13 +102,13 @@ def file_processing_dag():
         return {
             "file_path": file_path, 
             "validation_result": validation_result,
-            # "df": df,
+            "update_data_docs": update_data_docs,
             "result": result
             }
     
     # Task to move the file (can be removed since we save files directly)
     @task
-    def save_statistics(file_path, validation_result):
+    def save_statistics(file_path, validation_result, results):
         data_asset_name = os.path.basename(file_path)
         # run_results = validation_result["run_results"]
         # validation_key = next(iter(run_results))  # Since the key is dynamically generated
@@ -118,6 +122,35 @@ def file_processing_dag():
         checkpoint_name = validation_result["meta"]["checkpoint_name"]
         # file_name = validation_result["meta"]["batch_spec"]["path"]
 
+        df = ge.read_csv(file_path)
+        nb_rows = df.shape[0]
+        nb_cols = df.shape[1]
+
+        invalid_columns = set()
+        valid_columns = set(df.columns)  # Assume all columns are valid initially
+
+        # Analyze the validation results to find invalid columns
+        for res in validation_result.results:
+            column = res.expectation_config.kwargs.get("column")
+            if column and not res.success:
+                invalid_columns.add(column)
+                if column in valid_columns:
+                    valid_columns.remove(column)
+
+        nb_invalid_cols = len(invalid_columns)
+        nb_valid_cols = nb_cols - nb_invalid_cols
+
+        unexpected_indexes = []
+        for res in results.results:
+            if "unexpected_index_list" in res.result:
+                unexpected_indexes.extend(res.result["unexpected_index_list"])
+
+        print(unexpected_indexes)
+
+        invalid_rows = len(set(unexpected_indexes))
+        print(invalid_rows)
+        valid_rows = nb_rows - invalid_rows
+
         insert_data = {
             "run_id": run_id.run_name,
             "run_time": run_id.run_time,  # Get the run time from the run_id
@@ -128,7 +161,13 @@ def file_processing_dag():
             "datasource_name": datasource_name,
             "checkpoint_name": checkpoint_name,
             "expectation_suite_name": expectation_suite_name,
-            "file_name": data_asset_name
+            "file_name": data_asset_name,
+            "nb_rows": nb_rows,
+            "nb_valid_rows": valid_rows,
+            "nb_invalid_rows": invalid_rows,
+            "nb_cols": nb_cols,
+            "nb_valid_cols": nb_valid_cols,
+            "nb_invalid_cols": nb_invalid_cols
         }
 
         # Insert the statistics into the database
@@ -194,13 +233,45 @@ def file_processing_dag():
                 f"Request to Teams returned an error {response.status_code}, the response is:\n{response.text}"
             )
         
+    def classify_criticality(validation_result):
+        success_percent = validation_result["statistics"]["success_percent"]
+        # unsuccessful_expectations = validation_result["statistics"]["unsuccessful_expectations"]
+
+        if success_percent < 50: # or unsuccessful_expectations > 10:
+            return "high"
+        elif success_percent < 75:
+            return "medium"
+        else:
+            return "low"
+        
     @task
-    def send_alerts(results):
+    def send_alerts(results, update_data_docs):
+        criticality = classify_criticality(results)
+        # print(results)
         suite_name = results["meta"]["expectation_suite_name"]
         file_name = os.path.basename(results["meta"]["batch_spec"]["path"])
+        statistics_val = results["statistics"]
+        # run_id = results["meta"]["run_id"]
+        datasource_name = results["meta"]["active_batch_definition"]["datasource_name"]
+        # expectation_suite_name = results["meta"]["expectation_suite_name"]
+        checkpoint_name = results["meta"]["checkpoint_name"]
+
+        # data_docs_url = results["update_data_docs"]["local_site"]
 
         if not results["success"]:
-            message = f"Validation failed for expectation suite {suite_name}.\nFile name: {file_name}"
+            message = (
+            f"**Validation failed for expectation suite:** {suite_name}\n\n"
+            f"**Criticality:** {criticality}\n\n"
+            f"**File name:** {file_name}\n\n"
+            f"**Datasource:** {datasource_name}\n\n"
+            f"**Checkpoint:** {checkpoint_name}\n\n"
+            f"**Evaluated expectations:** {statistics_val['evaluated_expectations']}\n\n"
+            f"**Successful expectations:** {statistics_val['successful_expectations']}\n\n"
+            f"**Unsuccessful expectations:** {statistics_val['unsuccessful_expectations']}\n\n"
+            f"**Success percentage:** {statistics_val['success_percent']}%\n\n"
+            f"**Find the data report here:** {update_data_docs}"
+        )
+
             send_teams_alert(WEBHOOK, message)
         else:
             print(f"Validation successful for expectation suite {suite_name}.\nFile name: {file_name}")
@@ -208,8 +279,8 @@ def file_processing_dag():
     # Define task dependencies
     file_paths = read_data()
     results = validate_data(file_paths)  # Store the results
-    send_alerts(results["validation_result"])
-    save_statistics(results["file_path"], results["validation_result"])  # Access file_path and validation_result
+    send_alerts(results["validation_result"], results["update_data_docs"])
+    save_statistics(results["file_path"], results["validation_result"], results['result'])  # Access file_path and validation_result
     save_file(results["file_path"], results['result'])
 
 file_processing = file_processing_dag()

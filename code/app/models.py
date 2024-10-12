@@ -82,7 +82,13 @@ statistics = Table(
     Column('datasource_name', String),
     Column('checkpoint_name', String),
     Column('expectation_suite_name', String),
-    Column('file_name', String)
+    Column('file_name', String),
+    Column('nb_rows', Integer),
+    Column('nb_valid_rows', Integer),
+    Column('nb_invalid_rows', Integer),
+    Column('nb_cols', Integer),
+    Column('nb_valid_cols', Integer),
+    Column('nb_invalid_cols', Integer)
 )
 
 # Create the statistics table
