@@ -17,7 +17,6 @@ data/*/*.csv
 airflow/airflow.db
 airflow/airflow.cfg
 airflow/logs
-img.png
 
 # C extensions
 *.so
