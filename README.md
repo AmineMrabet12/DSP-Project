@@ -44,8 +44,8 @@ Make sure you have the following installed:
 
 1. **Clone the Repository**
     ```bash
-    git clone <your-repo-url>
-    cd <your-repo-folder>
+    git clone <repo-url>
+    cd <repo-folder>
     ```
 
 2. **Create a Virtual Environment**
@@ -239,6 +239,5 @@ Don't forget to always `export AIRFLOW_HOME=${PWD}/airflow`
 </center>
 
 ### Notes:
-- Replace `<your-repo-url>` with the actual URL of your repository.
 - Replace `<your_database_name>`, `user_name`, and `<your_password>` with the desired database name and password.
 - Update any paths as needed to fit your project's structure.
