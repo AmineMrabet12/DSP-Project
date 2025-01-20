@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  fastapi:
+    build:
+      context: .  # Change context to the root of the project (not just the code/app folder)
+    ports:
+      - "8000:8000"
+    networks:
+      - my_network
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=epita
+      - POSTGRES_USER=amine
+      - POSTGRES_PASSWORD=amine
+
+  streamlit:
+    build:
+      context: .  # Root directory for Streamlit Dockerfile
+      dockerfile: dockerfile  # Ensure the Dockerfile is correctly referenced
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app  # Mount the entire project directory into /app inside the container
+    depends_on:
+      - fastapi  # Ensure FastAPI starts before Streamlit
+    environment:
+      - FASTAPI_URL=http://fastapi:8000  # Connect Streamlit to FastAPI
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=epita
+      - POSTGRES_USER=amine
+      - POSTGRES_PASSWORD=amine
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: amine
+      POSTGRES_PASSWORD: amine
+      POSTGRES_DB: epita
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - my_network
+
+volumes:
+  postgres_data:
+
+networks:
+  my_network:
+    driver: bridge

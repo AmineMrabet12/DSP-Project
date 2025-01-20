@@ -7,6 +7,9 @@ __pycache__/
 # data/*.csv
 # airflow/airflow.db
 
+# AWS
+dsp.pem
+
 # data
 # data/*.csv
 # airflow/airflow.db

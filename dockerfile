@@ -1,41 +1,24 @@
-# FROM balenalib/amd64-python:3.9
+# Use an official Python image as the base
 FROM python:3.9-slim
-WORKDIR /DSP
 
+# Set the working directory
+WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /DSP
+# Copy the requirements file from the root directory
+COPY requirements.txt /app/
 
-# Install necessary dependencies
-# RUN mkdir -p /opt/google
-
-# RUN apt-get update && apt-get install -y \
-#     wget \
-#     curl \
-#     ca-certificates \
-#     gnupg
-
-# USER root
-# RUN apt-get update && apt-get install -y \
-#     curl \
-#     ca-certificates \
-#     gnupg && \
-#     rm -rf /var/lib/apt/lists/*
-
-# Download and install Google Chrome
-# RUN apt-get update && apt-get install -y unzip
-
-# RUN wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/117.0.5938.92/linux64/chrome-linux64.zip
-
-# RUN unzip -o chrome-linux64.zip -d /opt/google/chrome
-
-RUN pip install --upgrade pip
+# Install dependencies
 RUN pip install -r requirements.txt
-# RUN conda env create -n deep -f environment.yml
 
+# Copy the rest of the application code
+COPY . /app
 
-# Run app.py when the container launches
-ENTRYPOINT ["python"]
-CMD ["code/app/streamlit_app.py"]
+# Expose the port for Streamlit
+EXPOSE 8501
 
-EXPOSE 5000
+# Set Streamlit environment variables (optional)
+ENV STREAMLIT_SERVER_PORT=8501 \
+    STREAMLIT_SERVER_ADDRESS=0.0.0.0
+
+# Run the Streamlit app
+CMD ["streamlit", "run", "code/app/streamlit_app.py"]

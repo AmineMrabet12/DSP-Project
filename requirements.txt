@@ -13,3 +13,5 @@ pydantic==2.9.2
 toml==0.10.2
 great-expectations==0.18.21
 mistune==3.0.2
+python-dotenv
+uvicorn

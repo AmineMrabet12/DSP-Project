@@ -46,7 +46,7 @@ class ModelInput(BaseModel):
     MonthlyCharges: float
     TotalCharges: float
 
-model = load('../../models/grid_search.joblib')
+model = load('models/grid_search.joblib')
 
 @app.on_event("startup")
 async def startup():
@@ -107,10 +107,10 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
         }
 
     # Load preprocessing tools and column configurations
-    ordinal = load('../../models/Ordinal_Encoder.joblib')
-    scaler = load('../../models/Standard_Scaler.joblib')
-    categorical_columns = load('../../models/categorical_columns.joblib')
-    columns = load('../../models/columns.joblib')
+    ordinal = load('models/Ordinal_Encoder.joblib')
+    scaler = load('models/Standard_Scaler.joblib')
+    categorical_columns = load('models/categorical_columns.joblib')
+    columns = load('models/columns.joblib')
 
     # Ensure the dataframe columns are in the correct order
     input_df = input_df[columns]
