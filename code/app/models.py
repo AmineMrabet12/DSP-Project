@@ -12,6 +12,7 @@ load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 csv_path = '/Users/mohamedaminemrabet/Documents/EPITA/DSP/Final-Project-DSP/data/churn.csv' # 'data/churn.csv'
+csv_path = 'data/churn.csv'
 df = pd.read_csv(csv_path)
 
 df = df.apply(pd.to_numeric, errors='ignore')

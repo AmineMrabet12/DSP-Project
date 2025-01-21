@@ -3,13 +3,13 @@ version: '3.9'
 services:
   fastapi:
     build:
-      context: .  # Change context to the root of the project (not just the code/app folder)
+      context: .  # Build context is the root of the project
     ports:
       - "8000:8000"
     networks:
       - my_network
     depends_on:
-      - postgres
+      - postgres  # Make sure Postgres is available
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
@@ -19,8 +19,8 @@ services:
 
   streamlit:
     build:
-      context: .  # Root directory for Streamlit Dockerfile
-      dockerfile: dockerfile  # Ensure the Dockerfile is correctly referenced
+      context: .  # The build context for Streamlit
+      dockerfile: dockerfile  # Ensure the correct name of the Dockerfile (case-sensitive)
     ports:
       - "8501:8501"
     volumes:
@@ -28,12 +28,16 @@ services:
     depends_on:
       - fastapi  # Ensure FastAPI starts before Streamlit
     environment:
-      - FASTAPI_URL=http://fastapi:8000  # Connect Streamlit to FastAPI
+      - FASTAPI_PREDICT_URL=http://fastapi:8000/predict/  # Change localhost to service name
+      - FASTAPI_PAST_PREDICTIONS_URL=http://fastapi:8000/past_predictions/
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_DB=epita
-      - POSTGRES_USER=amine
+      - POSTGRES_USER=mohamedaminemrabet
       - POSTGRES_PASSWORD=amine
+
+    networks:
+      - my_network
 
   postgres:
     image: postgres:15
@@ -42,7 +46,7 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: amine
+      POSTGRES_USER: mohamedaminemrabet
       POSTGRES_PASSWORD: amine
       POSTGRES_DB: epita
     volumes:
@@ -51,7 +55,7 @@ services:
       - my_network
 
 volumes:
-  postgres_data:
+  postgres_data:  # Persistent volume for Postgres data
 
 networks:
   my_network:

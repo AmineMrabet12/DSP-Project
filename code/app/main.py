@@ -15,7 +15,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8501"],
+    allow_origins=["http://0.0.0.0:8501/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -149,7 +149,6 @@ async def get_predictions(start_date: str = Query(None),
     if end_date:
         end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
 
-    # Assuming your table has a 'date' column as a datetime field
     query = predictions.select()
 
     if start_date and end_date:

@@ -21,4 +21,5 @@ ENV STREAMLIT_SERVER_PORT=8501 \
     STREAMLIT_SERVER_ADDRESS=0.0.0.0
 
 # Run the Streamlit app
-CMD ["streamlit", "run", "code/app/streamlit_app.py"]
+# CMD ["streamlit", "run", "code/app/streamlit_app.py"]
+CMD ["streamlit", "run", "code/app/streamlit_app.py", "--server.headless=true", "--logger.level=debug"]

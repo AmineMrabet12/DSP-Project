@@ -12,7 +12,7 @@ load_dotenv()
 FASTAPI_PREDICT_URL = os.getenv('FASTAPI_PREDICT_URL')
 FASTAPI_PAST_PREDICTIONS_URL = os.getenv('FASTAPI_PAST_PREDICTIONS_URL')
 
-st.title("Prediction Web App")
+st.title("Prediction Web App") 
 
 # Options for the user interface
 option = st.selectbox("Select option:", ("Manual Input", "CSV File Upload", "View Past Predictions"))
