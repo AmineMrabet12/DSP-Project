@@ -38,7 +38,7 @@ def generate_input_fields(df):
 if option == "Manual Input":
     st.header("Input Features Manually")
 
-    sample_df = pd.read_csv('data/churn.csv')
+    sample_df = pd.read_csv('../../data/churn.csv')
     sample_df['TotalCharges'] = pd.to_numeric(sample_df['TotalCharges'], errors='coerce')
     sample_df = sample_df.dropna()
 
