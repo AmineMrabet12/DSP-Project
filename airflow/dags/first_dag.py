@@ -1,8 +1,6 @@
 from airflow.decorators import dag, task
 from datetime import datetime
 import os
-import shutil
-import pandas as pd
 from airflow.exceptions import AirflowSkipException
 import great_expectations as ge
 # from ruamel.yaml import YAML

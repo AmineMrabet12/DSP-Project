@@ -9,6 +9,8 @@ __pycache__/
 
 # AWS
 dsp.pem
+EPITA-courses:airflow-spike: This repository is used to introduce some basic concepts of Apache Airf.html
+EPITA-courses:airflow-spike: This repository is used to introduce some basic concepts of Apache Airflow for EPITA students in the AISand DSA MScs.pdf
 
 # data
 # data/*.csv

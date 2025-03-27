@@ -46,11 +46,14 @@ class ModelInput(BaseModel):
     MonthlyCharges: float
     TotalCharges: float
 
-model = load('../../models/grid_search.joblib')
+
+model = load("../../models/grid_search.joblib")
+
 
 @app.on_event("startup")
 async def startup():
     await database.connect()
+
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -58,9 +61,9 @@ async def shutdown():
 
 
 @app.post("/predict")
-async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
-                  request: Request):  # Accept a list of input data
-
+async def predict(
+    input_data_list: Union[ModelInput, List[ModelInput]], request: Request
+):  # Accept a list of input data
     source_prediction = "Scheduled Predictions"  # Default for Airflow
     if request.headers.get("X-Source") == "streamlit":
         source_prediction = "Web Application"
@@ -70,7 +73,7 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
         input_data_dicts = [item.dict() for item in input_data_list]
         input_df = pd.DataFrame(input_data_dicts)
 
-        customer_ids = input_df['customerID'].tolist()
+        customer_ids = input_df["customerID"].tolist()
 
         # Query to check if these CustomerIDs already exist
         query = f"""
@@ -80,7 +83,7 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
         input_data_dicts = [input_data_list.dict()]
         input_df = pd.DataFrame(input_data_dicts)
 
-        customer_ids = input_df['customerID'].tolist()
+        customer_ids = input_df["customerID"].tolist()
         # print(customer_ids)
 
         # Query to check if these CustomerIDs already exist
@@ -95,7 +98,7 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
         existing_df = pd.DataFrame(existing_records)
         # print(existing_df)
         l = list(input_df.columns)
-        l.append('prediction')
+        l.append("prediction")
         # print(l)
         existing_df = existing_df[l]
 
@@ -103,14 +106,14 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
         return {
             "message": "CustomerIDs already exist",
             "existing_data": True,
-            "predictions": existing_df.to_dict(orient='records')
+            "predictions": existing_df.to_dict(orient="records"),
         }
 
     # Load preprocessing tools and column configurations
-    ordinal = load('../../models/Ordinal_Encoder.joblib')
-    scaler = load('../../models/Standard_Scaler.joblib')
-    categorical_columns = load('../../models/categorical_columns.joblib')
-    columns = load('../../models/columns.joblib')
+    ordinal = load("../../models/Ordinal_Encoder.joblib")
+    scaler = load("../../models/Standard_Scaler.joblib")
+    categorical_columns = load("../../models/categorical_columns.joblib")
+    columns = load("../../models/columns.joblib")
 
     # Ensure the dataframe columns are in the correct order
     input_df = input_df[columns]
@@ -131,18 +134,18 @@ async def predict(input_data_list: Union[ModelInput, List[ModelInput]],
         input_data_dicts[idx]["date"] = current_time
         input_data_dicts[idx]["SourcePrediction"] = source_prediction
 
-        query = predictions.insert().values(
-            **input_data_dicts[idx]
-        )
+        query = predictions.insert().values(**input_data_dicts[idx])
         await database.execute(query)
 
-    return {"predictions": predictions_values} 
+    return {"predictions": predictions_values}
 
 
 @app.get("/past_predictions/")
-async def get_predictions(start_date: str = Query(None),
-                          end_date: str = Query(None),
-                          source: str = Query(None)):
+async def get_predictions(
+    start_date: str = Query(None),
+    end_date: str = Query(None),
+    source: str = Query(None),
+):
     # Convert string dates to datetime objects
     if start_date:
         start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
@@ -153,10 +156,7 @@ async def get_predictions(start_date: str = Query(None),
 
     if start_date and end_date:
         query = query.where(
-            and_(
-                predictions.c.date >= start_date,
-                predictions.c.date <= end_date
-            )
+            and_(predictions.c.date >= start_date, predictions.c.date <= end_date)
         )
     if source and source != "All":
         query = query.where(predictions.c.SourcePrediction == source)
@@ -166,4 +166,3 @@ async def get_predictions(start_date: str = Query(None),
     parsed_results = [dict(result) for result in results]
 
     return parsed_results
-
