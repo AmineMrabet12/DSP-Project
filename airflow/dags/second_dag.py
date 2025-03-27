@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PATH_TO_MODULE = os.getenv('PATH_TO_MODULE')
+PATH_TO_MODULE = os.getenv("PATH_TO_MODULE")
 
 sys.path.append(PATH_TO_MODULE)
 import models
@@ -26,33 +26,36 @@ BAD_DATA_PATH = os.path.join(data_path, "bad-data")
 # Define the path to your Great Expectations project
 GE_PROJECT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../gx/")
 
-DATABASE_URL = os.getenv('DATABASE_URL')
-WEBHOOK = os.getenv('WEBHOOK')
+DATABASE_URL = os.getenv("DATABASE_URL")
+WEBHOOK = os.getenv("WEBHOOK")
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
+
 @dag(
-    dag_id='Data_ingestion',
+    dag_id="Data_ingestion",
     start_date=datetime(2024, 1, 1),
-    schedule_interval='*/1 * * * *',
-    tags=['DSP'],
-    catchup=False
+    schedule_interval="*/1 * * * *",
+    tags=["DSP"],
+    catchup=False,
 )
 def file_processing_dag():
-
     # Task to read files
     @task
     def read_data():
         raw_files = os.listdir(RAW_DATA_PATH)
         print(f"Files in {RAW_DATA_PATH}: {raw_files}")
 
-        file_paths = [os.path.join(RAW_DATA_PATH, file) for file in raw_files if file.endswith('.csv')]
+        file_paths = [
+            os.path.join(RAW_DATA_PATH, file)
+            for file in raw_files
+            if file.endswith(".csv")
+        ]
 
         if not file_paths:
             raise AirflowSkipException("No new data found to process.")
 
-        return file_paths  
-
+        return file_paths
 
     @task(multiple_outputs=True)
     def validate_data(file_paths):
@@ -76,21 +79,26 @@ def file_processing_dag():
 
             checkpoint_name = "DSP-validator"
             checkpoint_result = context.run_checkpoint(
-                checkpoint_name=checkpoint_name,
-                batch_request=batch_request
+                checkpoint_name=checkpoint_name, batch_request=batch_request
             )
 
             # print(checkpoint_result)
             run_results = checkpoint_result["run_results"]
 
-            validation_key = next(iter(run_results))  # Since the key is dynamically generated
+            validation_key = next(
+                iter(run_results)
+            )  # Since the key is dynamically generated
 
             validation_result = run_results[validation_key]["validation_result"]
 
-            update_data_docs = run_results[validation_key]["actions_results"]["update_data_docs"]["local_site"]
+            update_data_docs = run_results[validation_key]["actions_results"][
+                "update_data_docs"
+            ]["local_site"]
 
             # Load the expectation suite
-            expectation_suite = context.get_expectation_suite(expectation_suite_name="DSP-Suite")
+            expectation_suite = context.get_expectation_suite(
+                expectation_suite_name="DSP-Suite"
+            )
 
             # Run the validation
             result = df.validate(expectation_suite, result_format="COMPLETE")
@@ -100,12 +108,12 @@ def file_processing_dag():
             break
 
         return {
-            "file_path": file_path, 
+            "file_path": file_path,
             "validation_result": validation_result,
             "update_data_docs": update_data_docs,
-            "result": result
-            }
-    
+            "result": result,
+        }
+
     # Task to move the file (can be removed since we save files directly)
     @task
     def save_statistics(file_path, validation_result, results):
@@ -113,7 +121,9 @@ def file_processing_dag():
 
         statistics_val = validation_result["statistics"]
         run_id = validation_result["meta"]["run_id"]
-        datasource_name = validation_result["meta"]["active_batch_definition"]["datasource_name"]
+        datasource_name = validation_result["meta"]["active_batch_definition"][
+            "datasource_name"
+        ]
         expectation_suite_name = validation_result["meta"]["expectation_suite_name"]
         checkpoint_name = validation_result["meta"]["checkpoint_name"]
 
@@ -149,10 +159,10 @@ def file_processing_dag():
         insert_data = {
             "run_id": run_id.run_name,
             "run_time": run_id.run_time,  # Get the run time from the run_id
-            "evaluated_expectations": statistics_val['evaluated_expectations'],
-            "successful_expectations": statistics_val['successful_expectations'],
-            "unsuccessful_expectations": statistics_val['unsuccessful_expectations'],
-            "success_percent": statistics_val['success_percent'],
+            "evaluated_expectations": statistics_val["evaluated_expectations"],
+            "successful_expectations": statistics_val["successful_expectations"],
+            "unsuccessful_expectations": statistics_val["unsuccessful_expectations"],
+            "success_percent": statistics_val["success_percent"],
             "datasource_name": datasource_name,
             "checkpoint_name": checkpoint_name,
             "expectation_suite_name": expectation_suite_name,
@@ -162,7 +172,7 @@ def file_processing_dag():
             "nb_invalid_rows": invalid_rows,
             "nb_cols": nb_cols,
             "nb_valid_cols": nb_valid_cols,
-            "nb_invalid_cols": nb_invalid_cols
+            "nb_invalid_cols": nb_invalid_cols,
         }
 
         with Session() as session:
@@ -175,7 +185,9 @@ def file_processing_dag():
         print("Statistics from validation:")
         print(f"Evaluated expectations: {statistics_val['evaluated_expectations']}")
         print(f"Successful expectations: {statistics_val['successful_expectations']}")
-        print(f"Unsuccessful expectations: {statistics_val['unsuccessful_expectations']}")
+        print(
+            f"Unsuccessful expectations: {statistics_val['unsuccessful_expectations']}"
+        )
         print(f"Success percentage: {statistics_val['success_percent']}")
 
     @task
@@ -191,7 +203,9 @@ def file_processing_dag():
         if unexpected_indexes:
             unexpected_rows = df.iloc[unexpected_indexes]
 
-            bad_file_path = os.path.join(BAD_DATA_PATH, f"bad_{os.path.basename(file_path)}")
+            bad_file_path = os.path.join(
+                BAD_DATA_PATH, f"bad_{os.path.basename(file_path)}"
+            )
             unexpected_rows.to_csv(bad_file_path, index=False)
             # print(unexpected_rows)
             print(unexpected_rows.shape)
@@ -200,7 +214,9 @@ def file_processing_dag():
         # Save valid rows to the good data folder
         # else:
         good_rows = df.drop(index=unexpected_indexes)
-        good_file_path = os.path.join(GOOD_DATA_PATH, f"good_{os.path.basename(file_path)}")
+        good_file_path = os.path.join(
+            GOOD_DATA_PATH, f"good_{os.path.basename(file_path)}"
+        )
         good_rows.to_csv(good_file_path, index=False)
         # print(good_rows)
         print(good_rows.shape)
@@ -210,29 +226,25 @@ def file_processing_dag():
         print(f"Processing completed for {file_path}")
 
     def send_teams_alert(webhook_url, message):
-        payload = {
-            "text": message
-        }
-        headers = {
-            "Content-Type": "application/json"
-        }
+        payload = {"text": message}
+        headers = {"Content-Type": "application/json"}
         response = requests.post(webhook_url, data=json.dumps(payload), headers=headers)
-        
+
         if response.status_code != 200:
             raise ValueError(
                 f"Request to Teams returned an error {response.status_code}, the response is:\n{response.text}"
             )
-        
+
     def classify_criticality(validation_result):
         success_percent = validation_result["statistics"]["success_percent"]
 
-        if success_percent < 50: # or unsuccessful_expectations > 10:
+        if success_percent < 50:  # or unsuccessful_expectations > 10:
             return "high"
         elif success_percent < 75:
             return "medium"
         else:
             return "low"
-        
+
     @task
     def send_alerts(results, update_data_docs):
         criticality = classify_criticality(results)
@@ -244,27 +256,32 @@ def file_processing_dag():
 
         if not results["success"]:
             message = (
-            f"**Validation failed for expectation suite:** {suite_name}\n\n"
-            f"**Criticality:** {criticality}\n\n"
-            f"**File name:** {file_name}\n\n"
-            f"**Datasource:** {datasource_name}\n\n"
-            f"**Checkpoint:** {checkpoint_name}\n\n"
-            f"**Evaluated expectations:** {statistics_val['evaluated_expectations']}\n\n"
-            f"**Successful expectations:** {statistics_val['successful_expectations']}\n\n"
-            f"**Unsuccessful expectations:** {statistics_val['unsuccessful_expectations']}\n\n"
-            f"**Success percentage:** {statistics_val['success_percent']}%\n\n"
-            f"**Find the data report here:** {update_data_docs}"
-        )
+                f"**Validation failed for expectation suite:** {suite_name}\n\n"
+                f"**Criticality:** {criticality}\n\n"
+                f"**File name:** {file_name}\n\n"
+                f"**Datasource:** {datasource_name}\n\n"
+                f"**Checkpoint:** {checkpoint_name}\n\n"
+                f"**Evaluated expectations:** {statistics_val['evaluated_expectations']}\n\n"
+                f"**Successful expectations:** {statistics_val['successful_expectations']}\n\n"
+                f"**Unsuccessful expectations:** {statistics_val['unsuccessful_expectations']}\n\n"
+                f"**Success percentage:** {statistics_val['success_percent']}%\n\n"
+                f"**Find the data report here:** {update_data_docs}"
+            )
 
             send_teams_alert(WEBHOOK, message)
         else:
-            print(f"Validation successful for expectation suite {suite_name}.\nFile name: {file_name}")
+            print(
+                f"Validation successful for expectation suite {suite_name}.\nFile name: {file_name}"
+            )
 
     # Define task dependencies
     file_paths = read_data()
     results = validate_data(file_paths)
     send_alerts(results["validation_result"], results["update_data_docs"])
-    save_statistics(results["file_path"], results["validation_result"], results['result'])
-    save_file(results["file_path"], results['result'])
+    save_statistics(
+        results["file_path"], results["validation_result"], results["result"]
+    )
+    save_file(results["file_path"], results["result"])
+
 
 file_processing = file_processing_dag()

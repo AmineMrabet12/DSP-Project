@@ -17,3 +17,4 @@ mistune==3.0.2
 python-dotenv
 uvicorn
 databases
+joblib

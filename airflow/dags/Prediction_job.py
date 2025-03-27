@@ -13,12 +13,13 @@ load_dotenv()
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/")
 GOOD_DATA_FOLDER = os.path.join(data_path, "good-data")
 PROCESSED_FILES_PATH = os.path.join(data_path, "processed_files.json")
-MODEL_API_URL = os.getenv('FASTAPI_PREDICT_URL')
+MODEL_API_URL = os.getenv("FASTAPI_PREDICT_URL")
+
 
 def load_processed_files():
     if os.path.exists(PROCESSED_FILES_PATH):
         try:
-            with open(PROCESSED_FILES_PATH, 'r') as file:
+            with open(PROCESSED_FILES_PATH, "r") as file:
                 content = file.read().strip()
                 if not content:
                     return {}
@@ -28,14 +29,19 @@ def load_processed_files():
             return {}
     return {}
 
-def save_processed_files(files):    
-    with open(PROCESSED_FILES_PATH, 'w') as file:
+
+def save_processed_files(files):
+    with open(PROCESSED_FILES_PATH, "w") as file:
         json.dump(files, file)
 
 
 def check_for_new_data(**kwargs):
     files = os.listdir(GOOD_DATA_FOLDER)
-    new_files = [f for f in files if os.path.isfile(os.path.join(GOOD_DATA_FOLDER, f)) and '.csv' in f]
+    new_files = [
+        f
+        for f in files
+        if os.path.isfile(os.path.join(GOOD_DATA_FOLDER, f)) and ".csv" in f
+    ]
 
     processed_files = load_processed_files()
 
@@ -48,10 +54,10 @@ def check_for_new_data(**kwargs):
             files_to_process.append(file)
 
     if files_to_process:
-        print('Found new or modified data')
+        print("Found new or modified data")
         print(files_to_process)
 
-        kwargs['ti'].xcom_push(key='new_files', value=files_to_process)
+        kwargs["ti"].xcom_push(key="new_files", value=files_to_process)
 
         for file in files_to_process:
             file_path = os.path.join(GOOD_DATA_FOLDER, file)
@@ -62,7 +68,7 @@ def check_for_new_data(**kwargs):
 
 
 def make_predictions(**kwargs):
-    new_files = kwargs['ti'].xcom_pull(key='new_files', task_ids='check_for_new_data')
+    new_files = kwargs["ti"].xcom_pull(key="new_files", task_ids="check_for_new_data")
     print(new_files)
 
     if new_files:
@@ -72,15 +78,17 @@ def make_predictions(**kwargs):
 
             df = pd.read_csv(file_path)
 
-            data_json = df.to_dict(orient='records')
+            data_json = df.to_dict(orient="records")
 
-            response = requests.post(MODEL_API_URL, json=data_json, headers={"X-Source": "airflow"})
+            response = requests.post(
+                MODEL_API_URL, json=data_json, headers={"X-Source": "airflow"}
+            )
 
             if response.status_code == 200:
                 if "message" in response.json():
-                    predictions.append(response.json()['message']+' '+ f'for {file}')
+                    predictions.append(response.json()["message"] + " " + f"for {file}")
                 else:
-                    predictions.append(response.json()['predictions'])
+                    predictions.append(response.json()["predictions"])
             else:
                 predictions.append("Error")
 
@@ -88,28 +96,27 @@ def make_predictions(**kwargs):
 
 
 default_args = {
-    'owner': 'airflow',
-    'start_date': days_ago(1),
-    'depends_on_past': False,
-    'retries': 0,
+    "owner": "airflow",
+    "start_date": days_ago(1),
+    "depends_on_past": False,
+    "retries": 0,
 }
 
 # Define the DAG
 with DAG(
-    'Prediction_job',
+    "Prediction_job",
     default_args=default_args,
-    schedule_interval='*/2 * * * *',
+    schedule_interval="*/2 * * * *",
     catchup=False,
 ) as dag:
-
     check_for_new_data_task = PythonOperator(
-        task_id='check_for_new_data',
+        task_id="check_for_new_data",
         python_callable=check_for_new_data,
         provide_context=True,
     )
 
     make_predictions_task = PythonOperator(
-        task_id='make_predictions',
+        task_id="make_predictions",
         python_callable=make_predictions,
         provide_context=True,
     )
